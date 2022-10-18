@@ -23,15 +23,14 @@ OPTIONS
   Set the current time. Defaults to the system clock.
 """
 
-import cards
-import ttyio
+from fulgurate import cards
 import collections
 
-if __name__ == "__main__":
+def main():
   import datetime
   import sys
   import getopt
-  import argopen
+  from fulgurate import argopen
 
   try:
     opts, args = getopt.getopt(sys.argv[1:], "n:")
@@ -66,3 +65,6 @@ if __name__ == "__main__":
   schedule.sort(key=lambda (t, d, n): d)
   for item in schedule:
     print "%s %i %i" % item
+
+if __name__ == "__main__":
+  main()

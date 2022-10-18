@@ -23,7 +23,7 @@ OPTIONS
   Set the current time. Defaults to the system clock.
 """
 
-import cards
+from fulgurate import cards
 import sys
 
 def load_data(input):
@@ -35,10 +35,10 @@ def load_data(input):
       raise IOError("wrong number of records on line %i" % (i))
     yield(parts)
 
-if __name__ == "__main__":
+def main():
   import datetime
   import getopt
-  import argopen
+  from fulgurate import argopen
 
   try:
     opts, args = getopt.getopt(sys.argv[1:], "n:")
@@ -59,3 +59,6 @@ if __name__ == "__main__":
   with argopen.open(src) as input:
     with argopen.open(dest, 'w') as output:
       cards.save(output, (cards.card(top, bot, now) for top, bot in load_data(input)))
+
+if __name__ == "__main__":
+  main()

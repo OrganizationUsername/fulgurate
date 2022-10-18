@@ -43,8 +43,7 @@ OPTIONS
   Set a command to execute after a card's second field is shown. It should take cards on stdin in the same format as the command for -f. Its output is ignored.
 """
 
-import cards
-import ttyio
+from fulgurate import cards, ttyio
 
 def show_batch(cards):
   ttyio.clear()
@@ -93,11 +92,11 @@ def review_card(card, clear=True, wait=True, pre_filter=None, ext_filter=None, e
       elif ch in "12345":
         return int(ch)
 
-if __name__ == "__main__":
+def main():
   import datetime
   import sys
   import getopt
-  import argopen
+  from fulgurate import argopen
 
   try:
     opts, args = getopt.getopt(sys.argv[1:], "n:R:N:rb:f:F:")
@@ -144,3 +143,6 @@ if __name__ == "__main__":
     pass
   finally:
     cards.save_all(deck)
+
+if __name__ == "__main__":
+  main()
