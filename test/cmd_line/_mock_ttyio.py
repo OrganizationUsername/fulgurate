@@ -2,10 +2,10 @@ import sys
 import contextlib
 import io
 from mock import patch
-import fulgurate.ttyio
+import fulgurate._cmd_line._ttyio
 
 @contextlib.contextmanager
-def unbuffered(out_file):
+def Unbuffered(out_file):
     yield out_file
 
 class _MockedTtyio:
@@ -22,7 +22,7 @@ class _MockedTtyio:
 @contextlib.contextmanager
 def mock_ttyio(input_keys, clear_output=""):
     mock = _MockedTtyio(input_keys, clear_output)
-    with patch.object(fulgurate.ttyio, 'getch', mock._getch), \
-         patch.object(fulgurate.ttyio, 'clear', mock._clear), \
-         patch.object(fulgurate.ttyio, 'unbuffered', unbuffered):
+    with patch.object(fulgurate._cmd_line._ttyio, 'getch', mock._getch), \
+         patch.object(fulgurate._cmd_line._ttyio, 'clear', mock._clear), \
+         patch.object(fulgurate._cmd_line._ttyio, 'Unbuffered', Unbuffered):
         yield None

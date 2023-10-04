@@ -10,7 +10,7 @@ TEMP=build/tmp
 VENV=$(TEMP)/venv
 MANSRC=$(TEMP)/man/src
 MANOUT=$(TEMP)/man/out
-PROGS=$(addprefix fulgurate-, run import show-schedule)
+PROGS=$(addprefix fulgurate-, run import-cards show-schedule)
 MANPAGES=fulgurate.1 $(addsuffix .1, $(PROGS))
 DOCS=example.tsv example-filter.sh example-finish.sh
 
@@ -30,7 +30,7 @@ $(MANSRC)/fulgurate-%.txt: $(VENV)/.sentinel
 		source $(VENV)/bin/activate; \
 		echo fulgurate-$* | tr 'a-z' 'A-Z' | sed -e 's|$$|(1)|g'; \
 		echo fulgurate-$* | sed -e 's|.|=|g;s|$$|===|g'; \
-		python -c "from fulgurate.cmd_line import _$(subst -,_,$*) as cmd; print cmd.__doc__"; \
+		python -c "from fulgurate._cmd_line import $(subst -,_,$*) as cmd; print cmd.__doc__"; \
 		echo -e "SEE ALSO\n--------\n'fulgurate(1)'"; \
 	) > $@
 

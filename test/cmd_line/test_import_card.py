@@ -2,8 +2,8 @@ import sys
 import os.path
 import datetime
 from mock import patch
-from fulgurate import cards
-from fulgurate.cmd_line._import import main
+from fulgurate import files
+from fulgurate._cmd_line.import_cards import main
 from ._mock_ttyio import mock_ttyio
 from ._shared import FixNowDatetime
 
@@ -19,7 +19,7 @@ def _load_raw_cards(in_file):
         yield(parts)
 
 def _minimal_call(args):
-    with patch.object(cards, 'save') as save_mock, \
+    with patch.object(files, 'save') as save_mock, \
          patch.object(sys, 'argv', [""] + list(args)):
         main()
     return save_mock
@@ -33,7 +33,7 @@ def test_basic(tmpdir):
         main()
 
     with open(cards_path) as in_file:
-        deck = tuple(cards.load(in_file))
+        deck = tuple(files.load(in_file))
     assert len(deck) == len(input_data)
     assert all(c.top == t and c.bot == b for c, (t, b) in zip(deck, input_data))
     assert all(c.is_new for c in deck)

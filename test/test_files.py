@@ -1,6 +1,6 @@
 import datetime
 import pytest
-from fulgurate import cards
+from fulgurate import Card, files
 
 _time = datetime.datetime(2022, 10, 18)
 
@@ -19,15 +19,15 @@ def test_save_load(tmpdir):
     cards_path = str(tmpdir / "cards")
 
     input_deck = [
-        cards.card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        cards.card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        cards.card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
+        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
+        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
     ]
 
     with open(cards_path, 'w') as out_file:
-        cards.save(out_file, input_deck)
+        files.save(out_file, input_deck)
     with open(cards_path) as in_file:
-        output_deck = tuple(cards.load(in_file))
+        output_deck = tuple(files.load(in_file))
 
     _check_decks_equal(input_deck, output_deck)
 
@@ -39,23 +39,23 @@ def test_load_error(tmpdir):
 
     with open(tsv_path) as in_file:
         with pytest.raises(IOError):
-            tuple(cards.load(in_file))
+            tuple(files.load(in_file))
 
 def test_save_all_load_all(tmpdir):
     cards_path0 = str(tmpdir / "cards0")
     cards_path1 = str(tmpdir / "cards1")
 
     input_deck = [
-        cards.card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        cards.card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        cards.card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
+        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
+        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
     ]
     input_deck[0].filename = cards_path0
     input_deck[1].filename = cards_path1
     input_deck[2].filename = cards_path0
 
-    cards.save_all(input_deck)
-    output_deck = list(cards.load_all([cards_path0, cards_path1]))
+    files.save_all(input_deck)
+    output_deck = list(files.load_all([cards_path0, cards_path1]))
 
     output_deck.sort(key=lambda c: c.top)
     _check_decks_equal(input_deck, output_deck)

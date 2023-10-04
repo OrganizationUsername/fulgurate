@@ -23,10 +23,11 @@ OPTIONS
   Set the current time. Defaults to the system clock.
 """
 
-from fulgurate import cards
+from .._card import Card
+from .. import files
 import sys
 
-def load_data(input):
+def _load_data(input):
   for i, line in enumerate(input, 1):
     if line.startswith('#'):
       continue
@@ -58,7 +59,7 @@ def main():
   dest = args[1] if len(args) > 1 else "-"
   with argopen.open(src) as input:
     with argopen.open(dest, 'w') as output:
-      cards.save(output, (cards.card(top, bot, now) for top, bot in load_data(input)))
+      files.save(output, (Card(top, bot, now) for top, bot in _load_data(input)))
 
 if __name__ == "__main__":
   main()

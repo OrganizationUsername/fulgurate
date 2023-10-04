@@ -44,15 +44,17 @@ OPTIONS
 """
 
 import sys
-from fulgurate import cards, ttyio
+from .._card import Card
+from .. import files, run
+from . import _ttyio
 
-def show_batch(cards):
-  ttyio.clear()
+def _show_batch(cards):
+  _ttyio.clear()
   for i, card in enumerate(cards):
     print "%i: %s\r" % (i + 1, card.top)
   print "\r"
 
-class external_filter:
+class _external_filter:
   def __init__(self, command):
     import subprocess
     self.proc = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -69,10 +71,10 @@ class external_filter:
     self.proc.stdin.close()
     os.waitpid(self.proc.pid, 0)[1]
 
-def review_card(card, clear=True, wait=True, pre_filter=None, ext_filter=None, ext_finish=None):
+def _review_card(card, clear=True, wait=True, pre_filter=None, ext_filter=None, ext_finish=None):
   if clear:
-    ttyio.clear()
-  with ttyio.unbuffered(sys.stdin) as input:
+    _ttyio.clear()
+  with _ttyio.Unbuffered(sys.stdin) as input:
     if ext_filter is None:
       filename, top, bot = card.filename, card.top, card.bot
     else:
@@ -82,12 +84,12 @@ def review_card(card, clear=True, wait=True, pre_filter=None, ext_filter=None, e
       print "%s\r" % (filename)
     print "%s\r" % (top)
     if wait:
-      ttyio.getch()
+      _ttyio.getch()
     print "%s\r" % (bot)
     if ext_finish is not None:
       ext_finish.send_card(card)
     while True:
-      ch = ttyio.getch()
+      ch = _ttyio.getch()
       if ch == '`':
         return 0
       elif ch in "12345":
@@ -106,7 +108,7 @@ def main():
     print >> sys.stderr, "usage: %s [-n TIME] [-R NUM] [-N NUM] [-r] [-b NUM] [-f CMD] [-F CMD] CARDS-FILE [...]" % (sys.argv[0])
     sys.exit(1)
 
-  deck = tuple(cards.load_all(args))
+  deck = tuple(files.load_all(args))
 
   now = datetime.datetime.now()
   max_reviews = None
@@ -128,21 +130,21 @@ def main():
     elif opt == '-b':
       batch_size = int(arg)
     elif opt == '-f':
-      ext_filter = external_filter(arg)
+      ext_filter = _external_filter(arg)
     elif opt == '-F':
-      ext_finish = external_filter(arg)
+      ext_finish = _external_filter(arg)
 
   try:
-    with ttyio.unbuffered(sys.stdin) as input:
+    with _ttyio.Unbuffered(sys.stdin) as input:
       now = now.replace(hour=0, minute=0, second=0, microsecond=0)
       if batch_size is None:
-        cards.run_cards(deck, now, lambda *args: review_card(*args, ext_filter=ext_filter, ext_finish=ext_finish), max_reviews=max_reviews, max_new=max_new, randomize=randomize)
+        run.run_cards(deck, now, lambda *args: _review_card(*args, ext_filter=ext_filter, ext_finish=ext_finish), max_reviews=max_reviews, max_new=max_new, randomize=randomize)
       else:
-        cards.bulk_review(deck, now, batch_size, show_batch, lambda *args: review_card(*args, clear=False, wait=False, ext_filter=ext_filter, ext_finish=ext_finish), max_reviews=max_reviews, max_new=max_new, randomize=randomize)
+        run.bulk_review(deck, now, batch_size, _show_batch, lambda *args: _review_card(*args, clear=False, wait=False, ext_filter=ext_filter, ext_finish=ext_finish), max_reviews=max_reviews, max_new=max_new, randomize=randomize)
   except KeyboardInterrupt:
     pass
   finally:
-    cards.save_all(deck)
+    files.save_all(deck)
 
 if __name__ == "__main__":
   main()

@@ -23,7 +23,7 @@ OPTIONS
   Set the current time. Defaults to the system clock.
 """
 
-from fulgurate import cards
+from .. import files
 import collections
 
 def main():
@@ -42,7 +42,7 @@ def main():
 
   filename = args[0]
   with argopen.open(filename) as input:
-    deck = tuple(cards.load(input))
+    deck = tuple(files.load(input))
 
   batch_size = None
   now = datetime.datetime.now()
@@ -60,8 +60,8 @@ def main():
       on_day[card.next_time] += 1
 
   now = now.replace(hour=0, minute=0, second=0, microsecond=0)
-  print "%s %i %i" % (now.strftime(cards.time_fmt), -1, unseen)
-  schedule = [(next_time.strftime(cards.time_fmt), (next_time - now).days, on_day[next_time]) for next_time in on_day]
+  print "%s %i %i" % (now.strftime(files.time_fmt), -1, unseen)
+  schedule = [(next_time.strftime(files.time_fmt), (next_time - now).days, on_day[next_time]) for next_time in on_day]
   schedule.sort(key=lambda (t, d, n): d)
   for item in schedule:
     print "%s %i %i" % item

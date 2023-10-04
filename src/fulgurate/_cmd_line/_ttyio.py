@@ -9,7 +9,7 @@ import tempfile, shutil
 
 _clear = os.popen("clear").read()
 
-class unbuffered:
+class Unbuffered:
   def __init__(self, output):
     self.output = output
 
