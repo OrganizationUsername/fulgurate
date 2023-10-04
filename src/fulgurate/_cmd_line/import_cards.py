@@ -25,11 +25,10 @@ OPTIONS
   Set the current time. Defaults to the system clock.
 """
 
-import sys
-import datetime
-import getopt
+import argparse
 from .._card import Card
 from .. import files, _argopen
+from . import _args
 
 def _load_data(in_file):
     for i, line in enumerate(in_file, 1):
@@ -49,30 +48,36 @@ def _import(in_file, out_file, now):
         out_file,
     )
 
+def make_arg_parser():
+    arg_parser = argparse.ArgumentParser(description=__doc__.strip())
+    arg_parser.add_argument(
+        'input_path',
+        metavar="INPUT-FILE",
+        type=str,
+        default="-",
+        nargs='?',
+        help="Path to input cards file.",
+    )
+    arg_parser.add_argument(
+        'output_path',
+        metavar="DECK-FILE",
+        type=str,
+        default="-",
+        nargs='?',
+        help="Path to output deck file.",
+    )
+    _args.add_now(arg_parser)
+    return arg_parser
+
 def main():
     """
     Entry point.
     """
+    args = make_arg_parser().parse_args()
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:")
-        if len(args) < 1 or len(args) > 2:
-            raise getopt.GetoptError("wrong number of positional arguments")
-    except getopt.GetoptError:
-        print >> sys.stderr, "usage: %s [-n TIME] DATA-FILE [CARDS-FILE]" % (sys.argv[0])
-        sys.exit(1)
-
-    now = datetime.datetime.now()
-    for opt, arg in opts:
-        if opt == '-n':
-            import dateutil.parser
-            now = dateutil.parser.parse(arg)
-
-    src = args[0]
-    dest = args[1] if len(args) > 1 else "-"
-    with _argopen.open(src) as in_file, \
-         _argopen.open(dest, 'w') as out_file:
-        _import(in_file, out_file, now)
+    with _argopen.open(args.input_path) as in_file, \
+         _argopen.open(args.output_path, 'w') as out_file:
+        _import(in_file, out_file, args.now)
 
 if __name__ == "__main__":
     main()

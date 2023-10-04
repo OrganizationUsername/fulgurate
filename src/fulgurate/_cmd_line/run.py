@@ -57,10 +57,9 @@ OPTIONS
 import sys
 import os
 import subprocess
-import datetime
-import getopt
+import argparse
 from .. import files, run
-from . import _ttyio
+from . import _ttyio, _args
 
 def _show_batch(cards):
     _ttyio.clear()
@@ -168,55 +167,90 @@ def _review_deck(deck, now, max_reviews, max_new, randomize, batch_size, ext_fil
     finally:
         files.save_all(deck)
 
+def make_arg_parser():
+    arg_parser = argparse.ArgumentParser(description=__doc__.strip())
+    arg_parser.add_argument(
+        'input_paths',
+        metavar="DECK-FILE",
+        type=str,
+        nargs="*",
+        default=["-"],
+        help="Path to input deck file.",
+    )
+    _args.add_now(arg_parser)
+    arg_parser.add_argument(
+        '-R',
+        '--max-to-review',
+        dest='max_reviews',
+        type=int,
+        help="The maximum number of cards to review.",
+    )
+    arg_parser.add_argument(
+        '-N',
+        '--max-new',
+        dest='max_new',
+        type=int,
+        help="The maximum number of new cards.",
+    )
+    arg_parser.add_argument(
+        '-r',
+        '--randomize',
+        dest='randomize',
+        default=False,
+        action='store_true',
+        help="Randomly order cards to review, from among all input card sets."
+    )
+    arg_parser.add_argument(
+        '-b',
+        '--batch-size',
+        dest='batch_size',
+        type=int,
+        help="The size for each batch. Setting this enables batch mode.",
+    )
+    arg_parser.add_argument(
+        '-f',
+        '--card-filter',
+        dest='ext_filter',
+        type=_ExternalFilter,
+        default=None,
+        help="""
+            Set a command to filter cards. It should take on stdin a sequence
+            of card data lines consisting of filename, first field, and second
+            field, separated by tabs. It should output to stdout new card data
+            in the same format, which will be shown instead of the original
+            card data.
+        """
+    )
+    arg_parser.add_argument(
+        '-F',
+        '--finish-filter',
+        dest='ext_finish',
+        type=_ExternalFilter,
+        default=None,
+        help="""
+            Set a command to execute after a card's second field is shown. It
+            should take cards on stdin in the same format as the command for
+            -f. Its output is ignored.
+        """
+    )
+    return arg_parser
+
 def main():
     """
     Entry point.
     """
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:R:N:rb:f:F:")
-        if len(args) < 1:
-            raise getopt.GetoptError("wrong number of positional arguments")
-    except getopt.GetoptError:
-        print >> sys.stderr, "usage: %s [-n TIME] [-R NUM] [-N NUM] [-r] [-b NUM] [-f CMD]" \
-                             " [-F CMD] CARDS-FILE [...]" % (sys.argv[0])
-        sys.exit(1)
-
-    deck = tuple(files.load_all(args))
-
-    now = datetime.datetime.now()
-    max_reviews = None
-    max_new = None
-    randomize = False
-    batch_size = None
-    ext_filter = None
-    ext_finish = None
-    for opt, arg in opts:
-        if opt == '-n':
-            import dateutil.parser
-            now = dateutil.parser.parse(arg)
-        elif opt == '-R':
-            max_reviews = int(arg)
-        elif opt == '-N':
-            max_new = int(arg)
-        elif opt == '-r':
-            randomize = True
-        elif opt == '-b':
-            batch_size = int(arg)
-        elif opt == '-f':
-            ext_filter = _ExternalFilter(arg)
-        elif opt == '-F':
-            ext_finish = _ExternalFilter(arg)
+    args = make_arg_parser().parse_args()
 
     _review_deck(
-        deck=deck,
-        now=now,
-        max_reviews=max_reviews,
-        max_new=max_new,
-        randomize=randomize,
-        batch_size=batch_size,
-        ext_filter=ext_filter,
-        ext_finish=ext_finish,
+        deck=tuple(files.load_all(args.input_paths)),
+        now=args.now,
+        max_reviews=args.max_reviews,
+        max_new=args.max_new,
+        randomize=args.randomize,
+        batch_size=args.batch_size,
+        ext_filter=args.ext_filter,
+        ext_finish=args.ext_finish,
     )
 
 if __name__ == "__main__":

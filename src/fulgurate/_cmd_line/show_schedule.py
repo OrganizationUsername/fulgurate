@@ -27,11 +27,10 @@ OPTIONS
   Set the current time. Defaults to the system clock.
 """
 
-import sys
-import datetime
 import collections
-import getopt
+import argparse
 from .. import files, _argopen
+from . import _args
 
 def _show_schedule(deck, now):
     unseen = 0
@@ -51,31 +50,31 @@ def _show_schedule(deck, now):
     for item in schedule:
         print "%s %i %i" % item
 
+def make_arg_parser():
+    arg_parser = argparse.ArgumentParser(description=__doc__.strip())
+    arg_parser.add_argument(
+        'input_path',
+        metavar="DECK-FILE",
+        type=str,
+        default="-",
+        nargs="?",
+        help="Path to input deck file.",
+    )
+    _args.add_now(arg_parser)
+    return arg_parser
+
 def main():
     """
     Entry point.
     """
+    args = make_arg_parser().parse_args()
 
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "n:")
-        if len(args) != 1:
-            raise getopt.GetoptError("wrong number of positional arguments")
-    except getopt.GetoptError:
-        print >> sys.stderr, "usage: %s [-n TIME]" % (sys.argv[0])
-        sys.exit(1)
-
-    filename = args[0]
-    with _argopen.open(filename) as in_file:
+    with _argopen.open(args.input_path) as in_file:
         deck = tuple(files.load(in_file))
 
-    now = datetime.datetime.now()
-    for opt, arg in opts:
-        if opt == '-n':
-            import dateutil.parser
-            now = dateutil.parser.parse(arg)
-    now = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    args.now = args.now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    _show_schedule(deck, now)
+    _show_schedule(deck, args.now)
 
 if __name__ == "__main__":
     main()

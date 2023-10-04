@@ -93,11 +93,11 @@ def test_run_set_time(test_cards_path):
     _assert_run_cards_called_once_with(run_cards_mock, now=set_time)
 
 def test_run_set_max_reviews(test_cards_path):
-    run_cards_mock = _minimal_call(["-R", 12, str(test_cards_path)])
+    run_cards_mock = _minimal_call(["-R", "12", str(test_cards_path)])
     _assert_run_cards_called_once_with(run_cards_mock, max_reviews=12)
 
 def test_run_set_max_new(test_cards_path):
-    run_cards_mock = _minimal_call(["-N", 34, str(test_cards_path)])
+    run_cards_mock = _minimal_call(["-N", "34", str(test_cards_path)])
     _assert_run_cards_called_once_with(run_cards_mock, max_new=34)
 
 def test_run_set_randomize(test_cards_path):
@@ -106,7 +106,7 @@ def test_run_set_randomize(test_cards_path):
 
 def test_run_set_batch_size(test_cards_path):
     with patch.object(run, 'bulk_review') as bulk_review_mock:
-        _minimal_call(["-b", 56, str(test_cards_path)])
+        _minimal_call(["-b", "56", str(test_cards_path)])
     _assert_bulk_review_called_once_with(bulk_review_mock, batch_size=56)
 
 def test_external_filter():
