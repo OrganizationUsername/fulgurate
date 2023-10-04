@@ -1,19 +1,6 @@
 #!/usr/bin/env python2
 
 """
-NAME
-----
-
-fulgurate-run - run flashcards in the terminal
-
-SYNOPSIS
---------
-
-*fulgurate-run* ['OPTIONS'] CARDS-FILE [CARDS-FILE ...]
-
-DESCRIPTION
------------
-
 Runs one or more sets of flashcards interactively at the terminal. Cards can be
 presented individually (the default) or in batches where several cards will be
 presented before user feedback is required.
@@ -23,35 +10,6 @@ The interaction for each card is as follows. The program first shows the first
 then shows the second (bottom) part of the card. Press ~,1,2,3,4,5 for 0
 through 5 respectively, indicating your evaluation of how well you remembered
 the answer. 0 through 2 are failure responses and 3 through 5 are success.
-
-OPTIONS
--------
-
-*-n* 'YYYY-MM-DD'::
-  Set the current time. Defaults to the system clock.
-
-*-R* 'NUM'
-  Set the maximum number of cards to review.
-
-*-N* 'NUM'
-  Set the maximum number of new cards.
-
-*-r*
-  Randomly order cards to review, from among all input card sets.
-
-*-b* 'NUM'
-  Enable batch mode and set the number of cards in one batch.
-
-*-f* 'CMD'
-  Set a command to filter cards. It should take on stdin a sequence of card
-  data lines consisting of filename, first field, and second field, separated
-  by tabs. It should output to stdout new card data in the same format, which
-  will be shown instead of the original card data.
-
-*-F* 'CMD'
-  Set a command to execute after a card's second field is shown. It should take
-  cards on stdin in the same format as the command for -f. Its output is
-  ignored.
 """
 
 import sys

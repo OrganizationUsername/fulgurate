@@ -1,28 +1,9 @@
 #!/usr/bin/env python2
 
 """
-NAME
-----
-
-fulgurate-import - convert a two-column TSV file to a flashcard file
-
-SYNOPSIS
---------
-
-*fulgurate-import* ['OPTIONS'] TSV-FILE [CARDS-FILE]
-
-DESCRIPTION
------------
-
 Takes a tab-separated value file where the columns correspond to the first
 (top) and second (bottom) fields of the card respectively, and produces a cards
 file with the cards at initial state.
-
-OPTIONS
--------
-
-*-n* 'YYYY-MM-DD'::
-  Set the current time. Defaults to the system clock.
 """
 
 import argparse

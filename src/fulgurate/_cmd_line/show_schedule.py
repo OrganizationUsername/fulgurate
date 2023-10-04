@@ -1,30 +1,11 @@
 #!/usr/bin/env python2
 
 """
-NAME
-----
-
-fulgurate-show-schedule - print information about card scheduling
-
-SYNOPSIS
---------
-
-*fulgurate-show-schedule* ['OPTIONS'] CARDS-FILE
-
-DESCRIPTION
------------
-
 Prints information about how the cards in a file are currently scheduled. The
 first column in the output is the date, the second is number of days in the
 future, and the third is the number of cards scheduled for that time. A -1 in
 the second column indicates new cards, while 0 indicates the cards that are
 ready for review.
-
-OPTIONS
--------
-
-*-n* 'YYYY-MM-DD'::
-  Set the current time. Defaults to the system clock.
 """
 
 import collections

@@ -6,41 +6,29 @@ DOCPREFIX?=$(PREFIX)/share/doc/fulgurate
 PYTHON?=python2
 A2X?=a2x
 
-TEMP=build/tmp
-VENV=$(TEMP)/venv
-MANSRC=$(TEMP)/man/src
-MANOUT=$(TEMP)/man/out
-PROGS=$(addprefix fulgurate-, run import-cards show-schedule)
-MANPAGES=fulgurate.1 $(addsuffix .1, $(PROGS))
+VENV=venv.make
+MANOUT=man
+MANPROGS=$(addprefix fulgurate-, run import-cards show-schedule)
+MANPAGES=$(addsuffix .1, $(MANPROGS))
 DOCS=example.tsv example-filter.sh example-finish.sh
+PYTHTONREQS=argparse-manpage
 
 all: man
-
-$(TEMP):
-	mkdir -p $<
 
 $(VENV)/.sentinel:
 	rm -rf $(VENV)
 	$(PYTHON) -m virtualenv $(VENV)
-	source $(VENV)/bin/activate; pip install --upgrade .
-
-$(MANSRC)/fulgurate-%.txt: $(VENV)/.sentinel
-	mkdir -p $(MANSRC)
 	( \
 		source $(VENV)/bin/activate; \
-		echo fulgurate-$* | tr 'a-z' 'A-Z' | sed -e 's|$$|(1)|g'; \
-		echo fulgurate-$* | sed -e 's|.|=|g;s|$$|===|g'; \
-		python -c "from fulgurate._cmd_line import $(subst -,_,$*) as cmd; print cmd.__doc__"; \
-		echo -e "SEE ALSO\n--------\n'fulgurate(1)'"; \
-	) > $@
+		pip install --upgrade $(PYTHTONREQS) \
+		pip install --upgrade . \
+	)
 
-$(MANSRC)/fulgurate.txt: fulgurate-man README
-	mkdir -p $(MANSRC)
-	./$< > $@
-
-$(MANOUT)/%.1: $(TEMP)/man/src/%.txt
-	mkdir -p $(MANOUT)
-	$(A2X) -f manpage -L $< -D $(MANOUT)
+$(addprefix $(MANOUT)/, $(MANPAGES)): $(VENV)/.sentinel
+	( \
+		source $(VENV)/bin/activate; \
+		python setup.py build_manpages \
+	)
 
 man: $(addprefix $(MANOUT)/, $(MANPAGES))
 
@@ -54,6 +42,4 @@ install: man
 .PHONY: install
 
 clean:
-	find src -name '*.py' -exec rm {} \;
-	rm -rf $(TEMP) build
-	rm -rf *.pyc $(MANTEMPNAME).py $(MANTEMPNAME).txt $(MANPAGES)
+	rm -rf $(VENV) $(MANOUT)
