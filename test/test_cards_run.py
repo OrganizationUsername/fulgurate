@@ -134,6 +134,8 @@ def test_run_cards_review_failure():
     assert [c.repetitions for c in deck] == [2, 1, 2]
 
 def test_bulk_review_basic():
+    # Note that here we use randomize_batch=False since that's easier to test, even though it's not the default.
+
     def make_deck():
         return [
             cards.card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
@@ -152,54 +154,25 @@ def test_bulk_review_basic():
 
     del got_reviews[:], got_batches[:]
     deck = make_deck()
-    cards.bulk_review(deck, _time, 2, show_batch, make_review_card(5, 5, 5, 5, 5))
+    cards.bulk_review(deck, _time, 2, show_batch, make_review_card(5, 5, 5, 5, 5), randomize_batch=False)
     assert len(got_reviews) == 5
     assert [len(b) for b in got_batches] == [2, 2, 1]
     assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
-
-    del got_reviews[:], got_batches[:]
-    deck = make_deck()
-    cards.bulk_review(deck, _time, 2, show_batch, make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5))
-    assert len(got_reviews) == 9
-    assert [len(b) for b in got_batches] == [2, 2, 2, 2, 1]
-    assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
-    cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(5, 5, 5, 5, 5, 5))
-    assert len(got_reviews) == 15
-    assert [len(b) for b in got_batches] == [2, 2, 2, 2, 1, 2, 2, 2]
-    assert [c.repetitions for c in deck] == [2, 2, 2, 2, 2, 2, 2]
-
-@pytest.mark.xfail(reason="order broken")
-def test_bulk_review_basic_order():
-    # Once this passes it should be merged with the main test.
-
-    def make_deck():
-        return [
-            cards.card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-            cards.card("c", "d", _time, repetitions=0, interval=1.0, easiness=2.5),
-            cards.card("e", "f", _time, repetitions=0, interval=1.0, easiness=2.5),
-            cards.card("g", "h", _time, repetitions=0, interval=1.0, easiness=2.5),
-            cards.card("i", "h", _time, repetitions=0, interval=1.0, easiness=2.5),
-            cards.card("k", "l", _time, repetitions=1, interval=1.0, easiness=2.36),
-            cards.card("m", "n", _time, repetitions=2, interval=6.0, easiness=2.22),
-        ]
-
-    got_reviews, make_review_card = _make_review_tracker()
-    got_batches = []
-    def show_batch(batch):
-        got_batches.append(batch)
-
-    del got_reviews[:], got_batches[:]
-    deck = make_deck()
-    cards.bulk_review(deck, _time, 2, show_batch, make_review_card(5, 5, 5, 5, 5))
     assert [c.top for c in got_reviews] == ["a", "c", "e", "g", "i"]
 
     del got_reviews[:], got_batches[:]
     deck = make_deck()
-    cards.bulk_review(deck, _time, 2, show_batch, make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5))
-    assert [c.top for c in got_reviews] == ["a", "c", "e", "g", "i", "c", "g", "i", "i"]
-    cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(5, 5, 5, 5, 5, 5))
-    assert [c.top for c in got_reviews] == ["a", "c", "e", "g", "i", "c", "g", "i", "i", "a", "c",
-                                            "e", "g", "i", "k"]
+    cards.bulk_review(deck, _time, 2, show_batch, make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5), randomize_batch=False)
+    assert len(got_reviews) == 9
+    assert [len(b) for b in got_batches] == [2, 2, 2, 2, 1]
+    assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
+    assert [c.top for c in got_reviews] == ["a", "c", "c", "e", "e", "g", "e", "i", "i"]
+    del got_reviews[:], got_batches[:]
+    cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(5, 5, 5, 5, 5, 5), randomize_batch=False)
+    assert len(got_reviews) == 6
+    assert [len(b) for b in got_batches] == [2, 2, 2]
+    assert [c.repetitions for c in deck] == [2, 2, 2, 2, 2, 2, 2]
+    assert [c.top for c in got_reviews] == ["a", "c", "e", "g", "i", "k"]
 
 def test_bulk_review_max_reviews():
     deck = [
@@ -264,12 +237,46 @@ def test_bulk_review_randomize():
     with patch.object(random, 'shuffle', lambda xs: rng.shuffle(xs)):
         del got_reviews[:]
         deck = make_deck()
-        cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities))
+        cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
+                          randomize=True, randomize_batch=False)
         got0 = [(c.top, c.bot) for c in got_reviews]
         del got_reviews[:]
         deck = make_deck()
-        cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities))
+        cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
+                          randomize=True, randomize_batch=False)
         got1 = [(c.top, c.bot) for c in got_reviews]
+        assert len(got0) > 0
+        assert len(got1) > 0
+        assert got0 != got1
+
+def test_bulk_review_randomize_batch():
+    rng = random.Random(0)
+
+    def make_deck():
+        return [
+            cards.card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.5),
+            cards.card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.5),
+            cards.card("e", "f", _time, repetitions=1, interval=1.0, easiness=2.5),
+            cards.card("g", "h", _time, repetitions=1, interval=1.0, easiness=2.5),
+            cards.card("i", "j", _time, repetitions=1, interval=1.0, easiness=2.5),
+        ]
+
+    qualities = (3, 4, 5, 3, 4)
+
+    _got_reviews, make_review_card = _make_review_tracker()
+    got_batches = []
+    def show_batch(batch):
+        got_batches.append(batch)
+
+    with patch.object(random, 'shuffle', lambda xs: rng.shuffle(xs)):
+        del got_batches[:]
+        deck = make_deck()
+        cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities))
+        got0 = [[(c.top, c.bot) for c in b] for b in got_batches]
+        del got_batches[:]
+        deck = make_deck()
+        cards.bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities))
+        got1 = [[(c.top, c.bot) for c in b] for b in got_batches]
         assert len(got0) > 0
         assert len(got1) > 0
         assert got0 != got1

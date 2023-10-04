@@ -110,14 +110,15 @@ def run_cards(cards, now, review_card, max_reviews=None, max_new=None, randomize
     if current.is_new:
       reject_card(current)
 
-def bulk_review(cards, now, batch_size, show_batch, review_card, max_reviews=None, max_new=None, randomize=False):
+def bulk_review(cards, now, batch_size, show_batch, review_card, max_reviews=None, max_new=None, randomize=False, randomize_batch=True):
   import random
 
   choose_next, reject_card = fetch_cards(cards, now, max_reviews, max_new, randomize)
 
   batch = [n for i in range(batch_size) for n in [choose_next()] if n is not None]
   while len(batch) > 0:
-    random.shuffle(batch)
+    if randomize_batch:
+      random.shuffle(batch)
 
     show_batch(batch)
     def run_card(card):
