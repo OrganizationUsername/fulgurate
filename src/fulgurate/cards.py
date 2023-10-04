@@ -33,7 +33,7 @@ class card:
     else: self.repetitions += 1
     if self.repetitions == 1: self.interval = 1
     elif self.repetitions == 2: self.interval = 6
-    else: self.interval *= self.easiness
+    elif self.repetitions > 2: self.interval *= self.easiness
     self.time = time
 
   is_new = property(is_new)

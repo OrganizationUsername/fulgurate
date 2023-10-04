@@ -40,7 +40,6 @@ def test_new_card():
     assert card.easiness == 5.67
     assert not card.is_new
 
-@pytest.mark.xfail(reason="Bug in update for interval at under 2 repetitions, github issue #1")
 def test_repeat():
     assert _compare_repetitions_cases(_make_repetitions_cases(0, 1.0, 2.5), [
         (0, 1.0, 1.7), (0, 1.0, 1.96), (0, 1.0, 2.18),
@@ -58,6 +57,16 @@ def test_repeat():
         (0, 12.48, 1.3), (0, 12.48, 1.54), (0, 12.48, 1.76),
         (4, 24.2112, 1.94), (4, 25.9584, 2.08), (4, 27.2064, 2.18),
     ])
+
+def test_github_issue_1_wrong_interval_update():
+    def compare(got, want):
+        # Only look at interval
+        got = [(0, i, 0) for _, i, _ in got]
+        want = [(0, i, 0) for i in want]
+        return _compare_repetitions_cases(got, want)
+    # Interval shouldn't change for repetitions of 0
+    assert compare(_make_repetitions_cases(0, 12.48, 2.08), [12.48, 12.48, 12.48, 1, 1, 1])
+    assert compare(_make_repetitions_cases(1, 12.48, 2.08), [12.48, 12.48, 12.48, 6, 6, 6])
 
 def test_next_time():
     assert cards.card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5) \
