@@ -103,15 +103,15 @@ def test_run_cards_randomize():
 
     got_reviews, make_review_card = _make_review_tracker()
 
-    with patch.object(random, 'shuffle', lambda xs: rng.shuffle(xs)):
+    with patch.object(random, 'shuffle', rng.shuffle):
         del got_reviews[:]
         deck = make_deck()
         run_cards(deck, _time + _day, make_review_card(3, 4, 5, 3, 4), randomize=True)
-        got0 = [(c.top, c.bot) for c in got_reviews]
+        got0 = [(c.top, c.bottom) for c in got_reviews]
         del got_reviews[:]
         deck = make_deck()
         run_cards(deck, _time + _day, make_review_card(3, 4, 5, 3, 4), randomize=True)
-        got1 = [(c.top, c.bot) for c in got_reviews]
+        got1 = [(c.top, c.bottom) for c in got_reviews]
         assert len(got0) > 0
         assert got0 != got1
 
@@ -129,13 +129,14 @@ def test_run_cards_review_failure():
     got_reviews, make_review_card = _make_review_tracker()
 
     del got_reviews[:]
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError, match=".*quality.*"):
         run_cards(deck, _time + _day, make_review_card(4, None))
     assert len(got_reviews) == 2
     assert [c.repetitions for c in deck] == [2, 1, 2]
 
 def test_bulk_review_basic():
-    # Note that here we use randomize_batch=False since that's easier to test, even though it's not the default.
+    # Note that here we use randomize_batch=False since that's easier to test,
+    # even though it's not the default.
 
     def make_deck():
         return [
@@ -155,7 +156,8 @@ def test_bulk_review_basic():
 
     del got_reviews[:], got_batches[:]
     deck = make_deck()
-    bulk_review(deck, _time, 2, show_batch, make_review_card(5, 5, 5, 5, 5), randomize_batch=False)
+    bulk_review(deck, _time, 2, show_batch, make_review_card(5, 5, 5, 5, 5),
+                randomize_batch=False)
     assert len(got_reviews) == 5
     assert [len(b) for b in got_batches] == [2, 2, 1]
     assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
@@ -163,13 +165,15 @@ def test_bulk_review_basic():
 
     del got_reviews[:], got_batches[:]
     deck = make_deck()
-    bulk_review(deck, _time, 2, show_batch, make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5), randomize_batch=False)
+    bulk_review(deck, _time, 2, show_batch, make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5),
+                randomize_batch=False)
     assert len(got_reviews) == 9
     assert [len(b) for b in got_batches] == [2, 2, 2, 2, 1]
     assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
     assert [c.top for c in got_reviews] == ["a", "c", "c", "e", "e", "g", "e", "i", "i"]
     del got_reviews[:], got_batches[:]
-    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(5, 5, 5, 5, 5, 5), randomize_batch=False)
+    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(5, 5, 5, 5, 5, 5),
+                randomize_batch=False)
     assert len(got_reviews) == 6
     assert [len(b) for b in got_batches] == [2, 2, 2]
     assert [c.repetitions for c in deck] == [2, 2, 2, 2, 2, 2, 2]
@@ -235,17 +239,17 @@ def test_bulk_review_randomize():
     def show_batch(_batch):
         pass
 
-    with patch.object(random, 'shuffle', lambda xs: rng.shuffle(xs)):
+    with patch.object(random, 'shuffle', rng.shuffle):
         del got_reviews[:]
         deck = make_deck()
         bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
                     randomize=True, randomize_batch=False)
-        got0 = [(c.top, c.bot) for c in got_reviews]
+        got0 = [(c.top, c.bottom) for c in got_reviews]
         del got_reviews[:]
         deck = make_deck()
         bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
                     randomize=True, randomize_batch=False)
-        got1 = [(c.top, c.bot) for c in got_reviews]
+        got1 = [(c.top, c.bottom) for c in got_reviews]
         assert len(got0) > 0
         assert len(got1) > 0
         assert got0 != got1
@@ -267,15 +271,15 @@ def test_bulk_review_randomize_batch():
     def show_batch(batch):
         got_batches.append(batch)
 
-    with patch.object(random, 'shuffle', lambda xs: rng.shuffle(xs)):
+    with patch.object(random, 'shuffle', rng.shuffle):
         del got_batches[:]
         deck = make_deck()
         bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities))
-        got0 = [[(c.top, c.bot) for c in b] for b in got_batches]
+        got0 = [[(c.top, c.bottom) for c in b] for b in got_batches]
         del got_batches[:]
         deck = make_deck()
         bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities))
-        got1 = [[(c.top, c.bot) for c in b] for b in got_batches]
+        got1 = [[(c.top, c.bottom) for c in b] for b in got_batches]
         assert len(got0) > 0
         assert len(got1) > 0
         assert got0 != got1

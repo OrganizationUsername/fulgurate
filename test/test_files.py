@@ -8,7 +8,7 @@ def _check_decks_equal(input_deck, output_deck):
     assert len(output_deck) == len(input_deck)
     for got_card, want_card in zip(output_deck, input_deck):
         assert got_card.top == want_card.top
-        assert got_card.bot == want_card.bot
+        assert got_card.bottom == want_card.bottom
         assert got_card.time == want_card.time
         assert got_card.repetitions == want_card.repetitions
         assert got_card.interval == want_card.interval
@@ -25,7 +25,7 @@ def test_save_load(tmpdir):
     ]
 
     with open(cards_path, 'w') as out_file:
-        files.save(out_file, input_deck)
+        files.save(input_deck, out_file)
     with open(cards_path) as in_file:
         output_deck = tuple(files.load(in_file))
 

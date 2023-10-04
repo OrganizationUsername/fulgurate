@@ -1,5 +1,4 @@
 import datetime
-import pytest
 from fulgurate import Card
 
 _time = datetime.datetime(2022, 10, 18)
@@ -24,7 +23,7 @@ def _compare_repetitions_cases(got, want):
 def test_new_card():
     card = Card("a", "b", _time, repetitions=0, interval=1, easiness=2.5)
     assert card.top == "a"
-    assert card.bot == "b"
+    assert card.bottom == "b"
     assert card.time == _time
     assert card.repetitions == 0
     assert card.interval == 1
@@ -33,7 +32,7 @@ def test_new_card():
 
     card = Card("a", "b", _time, repetitions=1, interval=2.34, easiness=5.67)
     assert card.top == "a"
-    assert card.bot == "b"
+    assert card.bottom == "b"
     assert card.time == _time
     assert card.repetitions == 1
     assert card.interval == 2.34

@@ -1,12 +1,11 @@
 import sys
 import io
-import collections
 import datetime
 from mock import patch, Mock, ANY
 import pytest
 from fulgurate import Card, files, run
 from fulgurate._cmd_line import run as cmd_line_run
-from fulgurate._cmd_line.run import main, _external_filter, _review_card
+from fulgurate._cmd_line.run import main, _ExternalFilter
 from ._mock_ttyio import mock_ttyio
 from ._shared import FixNowDatetime
 
@@ -22,10 +21,10 @@ def test_cards_path(tmpdir):
         Card("e", "f", _cards_time),
     ]
     with open(cards_path, 'w') as out_file:
-        files.save(out_file, deck)
+        files.save(deck, out_file)
     return cards_path
 
-def _minimal_call(args, key_inputs=[]):
+def _minimal_call(args, key_inputs=()):
     """Call that mocks out the whole of the run."""
     with patch.object(run, 'run_cards') as run_cards_mock, \
          mock_ttyio(key_inputs), \
@@ -33,10 +32,10 @@ def _minimal_call(args, key_inputs=[]):
         main()
     return run_cards_mock
 
-def _minimal_real_call(args, key_inputs=[]):
+def _minimal_real_call(args, key_inputs=()):
     """Call that does a real run but mocks interaction."""
     with patch.object(cmd_line_run, '_review_card', Mock(return_value=5)) as review_card_mock, \
-         patch.object(cmd_line_run, '_external_filter') as external_filter_mock, \
+         patch.object(cmd_line_run, '_ExternalFilter') as external_filter_mock, \
          mock_ttyio(key_inputs), \
          patch.object(sys, 'argv', [""] + list(args)):
         main()
@@ -64,19 +63,19 @@ def test_run_basic(test_cards_path):
 
     key_inputs = ["x", "`"] * len(deck) + ["x", "1"] * len(deck) \
         + ["x", "2"] * len(deck) + ["y", "3", "y", "4", "y", "5"]
-    output = io.BytesIO()
+    out_file = io.BytesIO()
     with mock_ttyio(key_inputs, "CLEAR"), \
-         patch.object(sys, 'stdout', io.BytesIO()) as output, \
+         patch.object(sys, 'stdout', io.BytesIO()) as out_file, \
          patch.object(sys, 'argv', ["", "-n", set_time_str, str(test_cards_path)]):
         main()
 
-    output = zip(*([iter(output.getvalue().splitlines())] * 4))
+    output = zip(*([iter(out_file.getvalue().splitlines())] * 4))
     assert len(output) == len(deck) * 4
     for (got_clear_line, got_cards_line, got_top, got_bot), want_card in zip(output, deck):
         assert got_clear_line == "CLEAR"
         assert got_cards_line == test_cards_path
         assert got_top == want_card.top
-        assert got_bot == want_card.bot
+        assert got_bot == want_card.bottom
     with open(test_cards_path) as in_file:
         new_deck = tuple(files.load(in_file))
         assert new_deck[0].easiness <= new_deck[1].easiness < new_deck[2].easiness \
@@ -94,22 +93,18 @@ def test_run_set_time(test_cards_path):
     _assert_run_cards_called_once_with(run_cards_mock, now=set_time)
 
 def test_run_set_max_reviews(test_cards_path):
-    set_time = _cards_time + datetime.timedelta(days=2)
     run_cards_mock = _minimal_call(["-R", 12, str(test_cards_path)])
     _assert_run_cards_called_once_with(run_cards_mock, max_reviews=12)
 
 def test_run_set_max_new(test_cards_path):
-    set_time = _cards_time + datetime.timedelta(days=2)
     run_cards_mock = _minimal_call(["-N", 34, str(test_cards_path)])
     _assert_run_cards_called_once_with(run_cards_mock, max_new=34)
 
 def test_run_set_randomize(test_cards_path):
-    set_time = _cards_time + datetime.timedelta(days=2)
     run_cards_mock = _minimal_call(["-r", str(test_cards_path)])
     _assert_run_cards_called_once_with(run_cards_mock, randomize=True)
 
 def test_run_set_batch_size(test_cards_path):
-    set_time = _cards_time + datetime.timedelta(days=2)
     with patch.object(run, 'bulk_review') as bulk_review_mock:
         _minimal_call(["-b", 56, str(test_cards_path)])
     _assert_bulk_review_called_once_with(bulk_review_mock, batch_size=56)
@@ -120,7 +115,7 @@ def test_external_filter():
     card1 = Card("efg", "hij", _cards_time)
     card1.filename = "file1"
 
-    f = _external_filter("rev")
+    f = _ExternalFilter("rev")
     f.send_card(card0)
     f.send_card(card1)
     f.close()

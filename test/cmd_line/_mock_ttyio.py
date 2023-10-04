@@ -1,6 +1,4 @@
-import sys
 import contextlib
-import io
 from mock import patch
 import fulgurate._cmd_line._ttyio
 

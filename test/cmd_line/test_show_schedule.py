@@ -5,7 +5,6 @@ from mock import patch
 import pytest
 from fulgurate import Card, files
 from fulgurate._cmd_line.show_schedule import main
-from ._mock_ttyio import mock_ttyio
 from ._shared import FixNowDatetime
 
 _time_fmt = "%Y-%m-%d"
@@ -21,7 +20,7 @@ def test_cards_path(tmpdir):
     ]
     deck[0].repeat(5, _cards_time)
     with open(cards_path, 'w') as out_file:
-        files.save(out_file, deck)
+        files.save(deck, out_file)
     return cards_path
 
 def test_set_time_shortly_after(test_cards_path):
