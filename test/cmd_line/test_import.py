@@ -1,7 +1,6 @@
 import sys
 import os.path
 import datetime
-import pytest
 from mock import patch
 from fulgurate import cards
 from fulgurate.cmd_line._import import main
@@ -47,7 +46,6 @@ def test_no_set_time(tmpdir):
         save_mock = _minimal_call([str(_example_path), str(cards_path)])
     assert all(c.time == now_time for c in save_mock.call_args[1])
 
-@pytest.mark.xfail(reason="command line is bugged")
 def test_set_time(tmpdir):
     cards_path = str(tmpdir / "cards")
     set_time = datetime.datetime(2022, 10, 18)

@@ -56,7 +56,6 @@ def _assert_bulk_review_called_once_with(mock, cards=ANY, now=ANY, batch_size=AN
 def _assert_review_card_called_with(mock, card=ANY, ext_filter=ANY, ext_finish=ANY):
     mock.assert_called_with(card, ext_filter=ext_filter, ext_finish=ext_finish)
 
-@pytest.mark.xfail(reason="command line is bugged")
 def test_run_basic(test_cards_path):
     set_time = _cards_time
     set_time_str = set_time.strftime(_time_fmt)

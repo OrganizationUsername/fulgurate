@@ -45,7 +45,7 @@ def main():
     if len(args) < 1 or len(args) > 2:
       raise getopt.GetoptError("wrong number of positional arguments")
   except getopt.GetoptError:
-    print >> sys.stderr, "usage: %s [-n TIME] DATA-FILE [CARDS-FILE]"
+    print >> sys.stderr, "usage: %s [-n TIME] DATA-FILE [CARDS-FILE]" % (sys.argv[0])
     sys.exit(1)
 
   now = datetime.datetime.now()
@@ -54,8 +54,8 @@ def main():
       import dateutil.parser
       now = dateutil.parser.parse(arg)
 
-  src = sys.argv[1]
-  dest = sys.argv[2] if len(sys.argv) >= 3 else "-"
+  src = args[0]
+  dest = args[1] if len(args) > 1 else "-"
   with argopen.open(src) as input:
     with argopen.open(dest, 'w') as output:
       cards.save(output, (cards.card(top, bot, now) for top, bot in load_data(input)))

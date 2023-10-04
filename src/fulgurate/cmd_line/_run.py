@@ -43,6 +43,7 @@ OPTIONS
   Set a command to execute after a card's second field is shown. It should take cards on stdin in the same format as the command for -f. Its output is ignored.
 """
 
+import sys
 from fulgurate import cards, ttyio
 
 def show_batch(cards):
@@ -94,7 +95,6 @@ def review_card(card, clear=True, wait=True, pre_filter=None, ext_filter=None, e
 
 def main():
   import datetime
-  import sys
   import getopt
   from fulgurate import argopen
 
