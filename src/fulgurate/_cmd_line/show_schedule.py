@@ -14,6 +14,8 @@ import argparse
 from .. import files
 from . import _args
 
+_TIME_FMT = "%Y-%m-%d"
+
 def _show_schedule(deck, now):
     unseen = 0
     on_day = collections.defaultdict(int)
@@ -23,9 +25,9 @@ def _show_schedule(deck, now):
         else:
             on_day[card.next_time] += 1
 
-    print "%s %i %i" % (now.strftime(files.TIME_FMT), -1, unseen)
+    print "%s %i %i" % (now.strftime(_TIME_FMT), -1, unseen)
     schedule = [
-        (next_time.strftime(files.TIME_FMT), (next_time - now).days, on_day[next_time])
+        (next_time.strftime(_TIME_FMT), (next_time - now).days, on_day[next_time])
         for next_time in on_day
     ]
     schedule.sort(key=lambda (t, d, n): d)

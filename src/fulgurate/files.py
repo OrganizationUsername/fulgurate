@@ -8,7 +8,6 @@ from contextlib2 import ExitStack
 from ._card import Card
 
 __all__ = (
-    'TIME_FMT',
     'write_cards',
     'read_cards',
     'save',
@@ -17,8 +16,7 @@ __all__ = (
     'load_all',
 )
 
-TIME_FMT = "%Y-%m-%d"
-
+_TIME_FMT = "%Y-%m-%d"
 _CSV_DIALECT = csv.excel_tab # pylint: disable=invalid-name
 _FIELD_NAMES = (
     'time',
@@ -43,7 +41,7 @@ def write_cards(cards, writer):
         writer.writerow({
             'top': card.top,
             'bottom': card.bottom,
-            'time': card.time.strftime(TIME_FMT),
+            'time': card.time.strftime(_TIME_FMT),
             'repetitions': card.repetitions,
             'interval': card.interval,
             'easiness': card.easiness,
@@ -57,7 +55,7 @@ def read_cards(reader):
         yield Card(
             row['top'],
             row['bottom'],
-            time=datetime.datetime.strptime(row['time'], TIME_FMT),
+            time=datetime.datetime.strptime(row['time'], _TIME_FMT),
             repetitions=int(row['repetitions']),
             interval=float(row['interval']),
             easiness=float(row['easiness']),
