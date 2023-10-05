@@ -119,6 +119,7 @@ def _review_deck(deck, now, max_reviews, max_new, randomize, batch_size, ext_fil
                     max_reviews=max_reviews,
                     max_new=max_new,
                     randomize=randomize,
+                    randomize_batch=True,
                 )
     except KeyboardInterrupt:
         pass

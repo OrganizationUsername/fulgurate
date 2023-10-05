@@ -82,7 +82,7 @@ def bulk_review(
     max_reviews=None,
     max_new=None,
     randomize=False,
-    randomize_batch=True,
+    randomize_batch=False,
 ):
     """
     Review cards in batches.

@@ -48,9 +48,10 @@ def _assert_run_cards_called_once_with(mock, cards=ANY, now=ANY, review_card=ANY
 
 def _assert_bulk_review_called_once_with(mock, cards=ANY, now=ANY, batch_size=ANY, show_batch=ANY,
                                          review_card=ANY, max_reviews=ANY, max_new=ANY,
-                                         randomize=ANY):
+                                         randomize=ANY, randomize_batch=ANY):
     mock.assert_called_once_with(cards, now, batch_size, show_batch, review_card,
-                                 max_reviews=max_reviews, max_new=max_new, randomize=randomize)
+                                 max_reviews=max_reviews, max_new=max_new, randomize=randomize,
+                                 randomize_batch=randomize_batch)
 
 def _assert_review_card_called_with(mock, card=ANY, ext_filter=ANY, ext_finish=ANY):
     mock.assert_called_with(card, ext_filter=ext_filter, ext_finish=ext_finish)
@@ -108,7 +109,7 @@ def test_run_set_randomize(test_cards_path):
 def test_run_set_batch_size(test_cards_path):
     with patch.object(run, 'bulk_review') as bulk_review_mock:
         _minimal_call(["-b", "56", str(test_cards_path)])
-    _assert_bulk_review_called_once_with(bulk_review_mock, batch_size=56)
+    _assert_bulk_review_called_once_with(bulk_review_mock, batch_size=56, randomize_batch=True)
 
 def test_external_filter():
     card0 = Card("abc", "def", _cards_time)
