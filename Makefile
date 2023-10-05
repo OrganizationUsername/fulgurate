@@ -11,9 +11,9 @@ MANOUT=man
 MANPROGS=$(addprefix fulgurate-, run import-cards show-schedule)
 MANPAGES=$(addsuffix .1, $(MANPROGS))
 DOCS=example.tsv example-filter.sh example-finish.sh
-PYTHTONREQS=argparse-manpage
+PYTHTONREQS=tox argparse-manpage
 
-all: man
+all: test man
 
 $(VENV)/.sentinel:
 	rm -rf $(VENV)
@@ -23,6 +23,13 @@ $(VENV)/.sentinel:
 		pip install --upgrade $(PYTHTONREQS) \
 		pip install --upgrade . \
 	)
+
+test: $(VENV)/.sentinel
+	( \
+		source $(VENV)/bin/activate; \
+		tox \
+	)
+
 
 $(addprefix $(MANOUT)/, $(MANPAGES)): $(VENV)/.sentinel
 	( \
