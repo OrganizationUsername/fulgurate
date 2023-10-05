@@ -3,6 +3,8 @@ ABOUT
 
 Simple spaced repetition flashcard software. Flashcards are stored in a simple text format and the code is small enough to be easily modifiable. The spaced repetition algorithm is SM-2 (http://www.supermemo.com/english/ol/sm2.htm). See the python files or the man pages for usage of the programs. See the SM-2 website for more details on the algorithm and the scale of the user self-evaluation input.
 
+The command line and terminal programs are currently Unix-only, although portability should just need support for clearing the terminal and reading single characters.
+
 DATA
 ----
 
