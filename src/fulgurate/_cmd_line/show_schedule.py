@@ -40,8 +40,8 @@ def make_arg_parser():
         'input_file',
         metavar="DECK-FILE",
         type=argparse.FileType('r'),
-        default=sys.stdin,
-        nargs="?",
+        default=[sys.stdin],
+        nargs="*",
         help="Path to input deck file.",
     )
     _args.add_now(arg_parser)
@@ -53,11 +53,12 @@ def main():
     """
     args = make_arg_parser().parse_args()
 
-    with args.input_file as in_file:
-        deck = tuple(files.load(in_file))
-
     args.now = args.now.replace(hour=0, minute=0, second=0, microsecond=0)
-
+    deck = (
+        card
+        for in_file in args.input_file
+        for card in files.load(in_file)
+    )
     _show_schedule(deck, args.now)
 
 if __name__ == "__main__":
