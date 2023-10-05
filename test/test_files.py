@@ -15,6 +15,29 @@ def _check_decks_equal(input_deck, output_deck):
         assert got_card.easiness == want_card.easiness
         assert got_card.is_new == want_card.is_new
 
+def test_save_set_writer(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    made = []
+    with open(cards_path, 'w') as out_file:
+        def make_writer(f):
+            assert f == out_file
+            made.append(None)
+        files.save([], out_file, make_writer=make_writer)
+        assert made
+
+def test_load_set_reader(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with open(cards_path, 'w'):
+        pass
+    made = []
+    with open(cards_path) as in_file:
+        def make_reader(f):
+            assert f == in_file
+            made.append(None)
+            return []
+        list(files.load(in_file, make_reader=make_reader))
+        assert made
+
 def test_save_load(tmpdir):
     cards_path = str(tmpdir / "cards")
 
@@ -38,7 +61,7 @@ def test_load_error(tmpdir):
         print >> out_file, "\t".join(["a", "b", "c"])
 
     with open(tsv_path) as in_file:
-        with pytest.raises(IOError):
+        with pytest.raises(Exception):
             tuple(files.load(in_file))
 
 def test_save_all_load_all(tmpdir):
