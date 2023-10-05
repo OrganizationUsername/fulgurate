@@ -61,7 +61,8 @@ def test_run_basic(test_cards_path):
     with open(test_cards_path) as in_file:
         deck = list(files.load(in_file))
 
-    key_inputs = ["x", "`"] * len(deck) + ["x", "1"] * len(deck) \
+    # Note: make sure we test both keys for quality 0
+    key_inputs = ["x", "`"] * (len(deck) - 1) + ["x", "0"] + ["x", "1"] * len(deck) \
         + ["x", "2"] * len(deck) + ["y", "3", "y", "4", "y", "5"]
     out_file = io.BytesIO()
     with mock_ttyio(key_inputs, "CLEAR"), \

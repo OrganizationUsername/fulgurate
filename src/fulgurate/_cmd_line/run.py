@@ -80,7 +80,7 @@ def _review_card(card, clear=True, wait=True, ext_filter=None, ext_finish=None):
             ext_finish.send_card(card)
         while True:
             in_char = _ttyio.getch()
-            if in_char == '`':
+            if in_char in ('0', '`'):
                 return 0
             elif in_char in "12345":
                 return int(in_char)
