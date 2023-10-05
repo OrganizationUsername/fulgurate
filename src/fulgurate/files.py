@@ -5,7 +5,6 @@ Cards file IO.
 import datetime
 from contextlib2 import ExitStack
 from ._card import Card
-from . import _argopen
 
 __all__ = (
     'TIME_FMT',
@@ -57,7 +56,7 @@ def save_all(cards):
     with ExitStack() as file_stack:
         for card in cards:
             if card.filename not in outputs:
-                out_file = _argopen.open(card.filename, 'w')
+                out_file = open(card.filename, 'w')
                 outputs[card.filename] = file_stack.enter_context(out_file)
             save([card], outputs[card.filename])
 
@@ -66,7 +65,7 @@ def load_all(filenames):
     Load cards from multiple files, with the filename field set.
     """
     for filename in filenames:
-        with _argopen.open(filename) as in_file:
+        with open(filename) as in_file:
             for card in load(in_file):
                 card.filename = filename
                 yield card

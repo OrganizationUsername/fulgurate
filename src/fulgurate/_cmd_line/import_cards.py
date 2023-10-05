@@ -6,9 +6,10 @@ Takes a tab-separated value file where the columns correspond to the first
 file with the cards at initial state.
 """
 
+import sys
 import argparse
 from .._card import Card
-from .. import files, _argopen
+from .. import files
 from . import _args
 
 def _load_data(in_file):
@@ -32,18 +33,18 @@ def _import(in_file, out_file, now):
 def make_arg_parser():
     arg_parser = argparse.ArgumentParser(description=__doc__.strip())
     arg_parser.add_argument(
-        'input_path',
+        'input_file',
         metavar="INPUT-FILE",
-        type=str,
-        default="-",
+        type=argparse.FileType('r'),
+        default=sys.stdin,
         nargs='?',
         help="Path to input cards file.",
     )
     arg_parser.add_argument(
-        'output_path',
+        'output_file',
         metavar="DECK-FILE",
-        type=str,
-        default="-",
+        type=argparse.FileType('w'),
+        default=sys.stdout,
         nargs='?',
         help="Path to output deck file.",
     )
@@ -56,9 +57,7 @@ def main():
     """
     args = make_arg_parser().parse_args()
 
-    with _argopen.open(args.input_path) as in_file, \
-         _argopen.open(args.output_path, 'w') as out_file:
-        _import(in_file, out_file, args.now)
+    _import(args.input_file, args.output_file, args.now)
 
 if __name__ == "__main__":
     main()

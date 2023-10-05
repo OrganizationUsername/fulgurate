@@ -8,9 +8,10 @@ the second column indicates new cards, while 0 indicates the cards that are
 ready for review.
 """
 
+import sys
 import collections
 import argparse
-from .. import files, _argopen
+from .. import files
 from . import _args
 
 def _show_schedule(deck, now):
@@ -34,10 +35,10 @@ def _show_schedule(deck, now):
 def make_arg_parser():
     arg_parser = argparse.ArgumentParser(description=__doc__.strip())
     arg_parser.add_argument(
-        'input_path',
+        'input_file',
         metavar="DECK-FILE",
-        type=str,
-        default="-",
+        type=argparse.FileType('r'),
+        default=sys.stdin,
         nargs="?",
         help="Path to input deck file.",
     )
@@ -50,7 +51,7 @@ def main():
     """
     args = make_arg_parser().parse_args()
 
-    with _argopen.open(args.input_path) as in_file:
+    with args.input_file as in_file:
         deck = tuple(files.load(in_file))
 
     args.now = args.now.replace(hour=0, minute=0, second=0, microsecond=0)
