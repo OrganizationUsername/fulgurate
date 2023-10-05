@@ -95,7 +95,7 @@ def test_no_set_time(tmpdir):
     cards_path = str(tmpdir / "cards")
     with patch.object(datetime, 'datetime', FixNowDatetime(now_time)):
         save_mock = _minimal_call([str(_example_path), str(cards_path)])
-    assert all(c.time == now_time for c in save_mock.call_args[1])
+    assert all(c.last_repeat_time == now_time for c in save_mock.call_args[1])
 
 def test_set_time(tmpdir):
     cards_path = str(tmpdir / "cards")
@@ -105,7 +105,7 @@ def test_set_time(tmpdir):
         str(_example_path),
         str(cards_path),
     ])
-    assert all(c.time == set_time for c in save_mock.call_args[1])
+    assert all(c.last_repeat_time == set_time for c in save_mock.call_args[1])
 
 def test_set_dialect(tmpdir):
     cards_path = str(tmpdir / "cards")

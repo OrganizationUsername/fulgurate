@@ -24,7 +24,7 @@ def test_new_card():
     card = Card("a", "b", _time, repetitions=0, interval=1, easiness=2.5)
     assert card.top == "a"
     assert card.bottom == "b"
-    assert card.time == _time
+    assert card.last_repeat_time == _time
     assert card.repetitions == 0
     assert card.interval == 1
     assert card.easiness == 2.5
@@ -33,7 +33,7 @@ def test_new_card():
     card = Card("a", "b", _time, repetitions=1, interval=2.34, easiness=5.67)
     assert card.top == "a"
     assert card.bottom == "b"
-    assert card.time == _time
+    assert card.last_repeat_time == _time
     assert card.repetitions == 1
     assert card.interval == 2.34
     assert card.easiness == 5.67

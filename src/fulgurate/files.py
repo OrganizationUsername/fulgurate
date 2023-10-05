@@ -19,7 +19,7 @@ __all__ = (
 _TIME_FMT = "%Y-%m-%d"
 _CSV_DIALECT = csv.excel_tab # pylint: disable=invalid-name
 _FIELD_NAMES = (
-    'time',
+    'last repeat time',
     'repetitions',
     'interval',
     'easiness',
@@ -41,7 +41,7 @@ def write_cards(cards, writer):
         writer.writerow({
             'top': card.top,
             'bottom': card.bottom,
-            'time': card.time.strftime(_TIME_FMT),
+            'last repeat time': card.last_repeat_time.strftime(_TIME_FMT),
             'repetitions': card.repetitions,
             'interval': card.interval,
             'easiness': card.easiness,
@@ -55,7 +55,7 @@ def read_cards(reader):
         yield Card(
             row['top'],
             row['bottom'],
-            time=datetime.datetime.strptime(row['time'], _TIME_FMT),
+            last_repeat_time=datetime.datetime.strptime(row['last repeat time'], _TIME_FMT),
             repetitions=int(row['repetitions']),
             interval=float(row['interval']),
             easiness=float(row['easiness']),

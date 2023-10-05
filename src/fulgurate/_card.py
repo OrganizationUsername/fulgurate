@@ -10,10 +10,10 @@ class Card(object):
     Flash card.
     """
 
-    def __init__(self, top, bottom, time, repetitions=0, interval=1, easiness=2.5):
+    def __init__(self, top, bottom, last_repeat_time, repetitions=0, interval=1, easiness=2.5):
         self.top = top
         self.bottom = bottom
-        self.time = time.replace(second=0, microsecond=0)
+        self.last_repeat_time = last_repeat_time.replace(second=0, microsecond=0)
         self.repetitions = repetitions
         self.interval = interval
         self.easiness = easiness
@@ -31,9 +31,9 @@ class Card(object):
         """
         The time this card is currently scheduled for.
         """
-        return self.time + datetime.timedelta(days=math.ceil(self.interval))
+        return self.last_repeat_time + datetime.timedelta(days=math.ceil(self.interval))
 
-    def repeat(self, quality, time):
+    def repeat(self, quality, now):
         """
         Do a repeatition of this card using SM-2.
         """
@@ -53,4 +53,4 @@ class Card(object):
             self.interval = 6
         elif self.repetitions > 2:
             self.interval *= self.easiness
-        self.time = time
+        self.last_repeat_time = now
