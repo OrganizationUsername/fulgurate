@@ -38,6 +38,7 @@ setup(
     install_requires=[
         "python-dateutil ~= 2.8",
         "contextlib2 ~= 0.6",
+        "tabulate ~= 0.8",
     ],
     cmdclass={
         'build_manpages': build_manpages_proxy,

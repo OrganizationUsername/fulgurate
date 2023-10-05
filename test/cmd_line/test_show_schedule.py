@@ -3,6 +3,7 @@ import io
 import datetime
 from mock import patch
 import pytest
+import tabulate
 from fulgurate import Card, files
 from fulgurate._cmd_line.show_schedule import main
 from ._shared import FixNowDatetime
@@ -23,6 +24,12 @@ def test_cards_path(tmpdir):
         files.save(deck, out_file)
     return cards_path
 
+def test_tabulate(test_cards_path):
+    with patch.object(sys, 'argv', ["", str(test_cards_path)]), \
+         patch.object(tabulate, 'tabulate') as tabulate_mock:
+        main()
+    tabulate_mock.assert_called()
+
 def test_set_time_shortly_after(test_cards_path):
     set_time = _cards_time + datetime.timedelta(hours=2)
     set_time_str = set_time.strftime(_time_fmt)
@@ -31,7 +38,7 @@ def test_set_time_shortly_after(test_cards_path):
         num_cards = len(list(files.load(in_file)))
 
     with patch.object(sys, 'stdout', io.BytesIO()) as output, \
-         patch.object(sys, 'argv', ["", "-n", set_time_str, str(test_cards_path)]):
+         patch.object(sys, 'argv', ["", "-n", set_time_str, str(test_cards_path), "-s"]):
         main()
 
     assert output.getvalue().splitlines() == [
@@ -48,7 +55,7 @@ def test_no_set_time_layer(test_cards_path):
 
     with patch.object(datetime, 'datetime', FixNowDatetime(now_time)), \
          patch.object(sys, 'stdout', io.BytesIO()) as output, \
-         patch.object(sys, 'argv', ["", str(test_cards_path)]):
+         patch.object(sys, 'argv', ["", str(test_cards_path), "-s"]):
         main()
 
     assert output.getvalue().splitlines() == [

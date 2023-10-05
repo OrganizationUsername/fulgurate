@@ -11,12 +11,13 @@ ready for review.
 import sys
 import collections
 import argparse
+import tabulate
 from .. import files
 from . import _args
 
 _TIME_FMT = "%Y-%m-%d"
 
-def _show_schedule(deck, now):
+def _make_schedule(deck, now):
     unseen = 0
     on_day = collections.defaultdict(int)
     for card in deck:
@@ -25,14 +26,26 @@ def _show_schedule(deck, now):
         else:
             on_day[card.next_time] += 1
 
-    print "%s %i %i" % (now.strftime(_TIME_FMT), -1, unseen)
+    yield now, -1, unseen
+
     schedule = [
-        (next_time.strftime(_TIME_FMT), (next_time - now).days, on_day[next_time])
+        (next_time, (next_time - now).days, on_day[next_time])
         for next_time in on_day
     ]
     schedule.sort(key=lambda (t, d, n): d)
-    for item in schedule:
-        print "%s %i %i" % item
+    for row in schedule:
+        yield row
+
+def _show_schedule_simple(table):
+    for time, days_away, num in table:
+        print "%s %i %i" % (time.strftime(_TIME_FMT), days_away, num)
+
+def _show_schedule_tabulate(table):
+    table = ((t.strftime(_TIME_FMT), d, n) for t, d, n in table)
+    print(tabulate.tabulate(
+        table,
+        headers=['review time', 'days away', 'number of cards'],
+    ))
 
 def make_arg_parser():
     arg_parser = argparse.ArgumentParser(description=__doc__.strip())
@@ -43,6 +56,14 @@ def make_arg_parser():
         default=[sys.stdin],
         nargs="*",
         help="Path to input deck file.",
+    )
+    arg_parser.add_argument(
+        '-s',
+        '--simple-table',
+        dest='simple_table',
+        default=False,
+        action='store_true',
+        help="Output a single-space separated table with no header, instead of pretty printing.",
     )
     _args.add_now(arg_parser)
     return arg_parser
@@ -59,7 +80,11 @@ def main():
         for in_file in args.input_file
         for card in files.load(in_file)
     )
-    _show_schedule(deck, args.now)
+    schedule = _make_schedule(deck, args.now)
+    if args.simple_table:
+        _show_schedule_simple(schedule)
+    else:
+        _show_schedule_tabulate(schedule)
 
 if __name__ == "__main__":
     main()
