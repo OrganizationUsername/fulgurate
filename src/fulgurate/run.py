@@ -1,54 +1,54 @@
 """
-Management of run cycle for cards.
+Management of practice cycle for cards.
 """
 
 import random
 import itertools
 
 __all__ = (
-    'fetch_cards',
+    'CardFetcher',
     'run_cards',
     'bulk_review',
 )
 
-def fetch_cards(cards, now, max_reviews=None, max_new=None, randomize=False):
-    """
-    Choose cards to review successively. This is a base for making review
-    systems.
+class CardFetcher(object):
+    def __init__(self, cards, now, max_reviews=None, max_new=None, randomize=False):
+        """
+        Manages choosing cards to practice successively. This is a base for
+        making practice systems.
 
-    `now` is the current time for the review. Does up to `max_reviews` reviews
-    and `max_new` cards before stopping. If `randomize` is set, then reviews
-    happen in random order.
+        `now` is the current time for the review. Does up to `max_reviews`
+        reviews and `max_new` cards before stopping. If `randomize` is set,
+        then reviews happen in random order.
+        """
+        self._new_cards = list(itertools.islice((c for c in cards if c.is_new), max_new))
+        self._new_cards.reverse()
+        self._to_review = list(itertools.islice(
+            (c for c in cards if not c.is_new and c.next_time <= now),
+            max_reviews,
+        ))
+        self._to_review.reverse()
+        if randomize:
+            random.shuffle(self._to_review)
 
-    Returns `choose_next()` and `reject_card()`. Call the former to get the
-    next card to review or `None` if there are no more, and the later to reject
-    a card and put it back for review.
-    """
-
-    new_cards = list(itertools.islice((c for c in cards if c.is_new), max_new))
-    new_cards.reverse()
-    to_review = list(itertools.islice(
-        (c for c in cards if not c.is_new and c.next_time <= now),
-        max_reviews,
-    ))
-    to_review.reverse()
-    if randomize:
-        random.shuffle(to_review)
-
-    def choose_next():
-        if to_review:
-            return to_review.pop()
-        if new_cards:
-            return new_cards.pop()
+    def choose_next(self):
+        """
+        Get the next card to review, or `None` if there are none left to review.
+        """
+        if self._to_review:
+            return self._to_review.pop()
+        if self._new_cards:
+            return self._new_cards.pop()
         return None
 
-    def reject_card(card):
+    def reject_card(self, card):
+        """
+        Reject card, putting it back for further practice in this run.
+        """
         if card.is_new:
-            new_cards.insert(0, card)
+            self._new_cards.insert(0, card)
         else:
-            to_review.insert(0, card)
-
-    return choose_next, reject_card
+            self._to_review.insert(0, card)
 
 def run_cards(cards, now, review_card, max_reviews=None, max_new=None, randomize=False):
     """
@@ -62,16 +62,16 @@ def run_cards(cards, now, review_card, max_reviews=None, max_new=None, randomize
     quality for the repetition. This function can manage any UI for the review.
     """
 
-    choose_next, reject_card = fetch_cards(cards, now, max_reviews, max_new, randomize)
+    fetcher = CardFetcher(cards, now, max_reviews, max_new, randomize)
 
     while True:
-        current = choose_next()
+        current = fetcher.choose_next()
         if current is None:
             break
         quality = review_card(current)
         current.repeat(quality, now)
         if current.is_new:
-            reject_card(current)
+            fetcher.reject_card(current)
 
 def bulk_review(
     cards,
@@ -100,14 +100,14 @@ def bulk_review(
     review.
     """
 
-    choose_next, _ = fetch_cards(cards, now, max_reviews, max_new, randomize)
+    fetcher = CardFetcher(cards, now, max_reviews, max_new, randomize)
 
     def run_card(card):
         quality = review_card(card)
         card.repeat(quality, now)
         return quality
 
-    batch = [c for _ in range(batch_size) for c in (choose_next(),) if c is not None]
+    batch = [c for _ in range(batch_size) for c in (fetcher.choose_next(),) if c is not None]
     while batch:
         if randomize_batch:
             random.shuffle(batch)
@@ -118,7 +118,7 @@ def bulk_review(
         batch = [c for c in batch if c.is_new]
 
         while len(batch) < batch_size:
-            card = choose_next()
+            card = fetcher.choose_next()
             if card is None:
                 break
             batch.append(card)
