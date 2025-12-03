@@ -1,0 +1,35 @@
+About
+-----
+
+Simple spaced repetition flashcard software. Flashcards are stored in a simple
+text format and the code is small enough to be easily modifiable. The spaced
+repetition algorithm is SM-2 (http://www.supermemo.com/english/ol/sm2.htm). See
+the python files or the man pages for usage of the programs. See the SM-2
+website for more details on the algorithm and the scale of the user
+self-evaluation input.
+
+The command line and terminal programs are currently Unix-only, although
+portability should just need support for clearing the terminal and reading
+single characters.
+
+Data
+----
+
+Flashcards have two parts, corresponding to the top and bottom of a card. The
+input to fulgurate-import should contain tab-separated two columns for the top
+and bottom fields respectively. The flashcard files themselves (produced by
+fulgurate-import) are similar but include the card state.
+
+Example
+-------
+
+An example of common usage is as follows:
+
+  fulgurate-import example.tsv example.cards # Create a flashcard set
+  fulgurate-run example.cards # Run the flashcards in the terminal
+  fulgurate-show-schedule example.cards # Show the current scheduling for the cards
+
+The included example.tsv file is sample card data consisting of a few
+Chinese-English dictionary entries from CC-CEDICT. The files example-filter.sh
+and example-finish.sh are for fulgurate-run's -f and -F options respectively,
+and are designed to work with the same data.
