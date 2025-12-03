@@ -36,8 +36,8 @@ setup(
         ],
     },
     install_requires=[
-        "python-dateutil ~= 2.8",
-        "tabulate ~= 0.8",
+        "python-dateutil ~= 2.9",
+        "tabulate ~= 0.9",
     ],
     cmdclass={
         'build_manpages': build_manpages_proxy,
