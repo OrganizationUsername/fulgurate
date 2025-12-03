@@ -24,7 +24,7 @@ class build_manpages_proxy(Command):
 setup(
     name="fulgurate",
     version="2.0.0",
-    python_requires=">=2.7",
+    python_requires=">=3.8",
     url="https://github.com/theq629/fulgurate",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
@@ -37,7 +37,6 @@ setup(
     },
     install_requires=[
         "python-dateutil ~= 2.8",
-        "contextlib2 ~= 0.6",
         "tabulate ~= 0.8",
     ],
     cmdclass={

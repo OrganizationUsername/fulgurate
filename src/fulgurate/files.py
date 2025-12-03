@@ -4,7 +4,7 @@ Cards file IO.
 
 import datetime
 import csv
-from contextlib2 import ExitStack
+from contextlib import ExitStack
 from ._card import Card
 
 __all__ = (
@@ -77,10 +77,9 @@ def load(in_file, make_reader=None):
     if make_reader is None:
         make_reader = _make_default_reader
     reader = make_reader(in_file)
-    for card in read_cards(reader):
-        yield card
+    yield from read_cards(reader)
 
-def save_all(cards, make_writer=None):
+def save_all(cards, make_writer=None, encoding='utf-8'):
     """
     Given cards with the filename field set, save them to their respectively files.
     """
@@ -88,16 +87,17 @@ def save_all(cards, make_writer=None):
     with ExitStack() as file_stack:
         for card in cards:
             if card.filename not in outputs:
-                out_file = open(card.filename, 'w')
+                # pylint: disable=consider-using-with
+                out_file = open(card.filename, 'w', newline='', encoding=encoding)
                 outputs[card.filename] = file_stack.enter_context(out_file)
             save([card], outputs[card.filename], make_writer=make_writer)
 
-def load_all(filenames, make_reader=None):
+def load_all(filenames, make_reader=None, encoding='utf-8'):
     """
     Load cards from multiple files, with the filename field set.
     """
     for filename in filenames:
-        with open(filename) as in_file:
+        with open(filename, newline='', encoding=encoding) as in_file:
             for card in load(in_file, make_reader=make_reader):
                 card.filename = filename
                 yield card

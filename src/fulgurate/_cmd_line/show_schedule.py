@@ -32,13 +32,12 @@ def _make_schedule(deck, now):
         (next_time, (next_time - now).days, on_day[next_time])
         for next_time in on_day
     ]
-    schedule.sort(key=lambda (t, d, n): d)
-    for row in schedule:
-        yield row
+    schedule.sort(key=lambda tdn: tdn[1])
+    yield from schedule
 
 def _show_schedule_simple(table):
     for time, days_away, num in table:
-        print "%s %i %i" % (time.strftime(_TIME_FMT), days_away, num)
+        print(f"{time.strftime(_TIME_FMT)} {days_away} {num}")
 
 def _show_schedule_tabulate(table):
     table = ((t.strftime(_TIME_FMT), d, n) for t, d, n in table)

@@ -1,7 +1,7 @@
 import sys
 import os.path
 import datetime
-from mock import patch, Mock, ANY
+from unittest.mock import patch, Mock, ANY
 import pytest
 from fulgurate import files
 from fulgurate._cmd_line import import_cards as cmd_line_import_cards
@@ -12,7 +12,7 @@ _time_fmt = "%Y-%m-%d"
 _example_path = os.path.join(os.path.dirname(__file__), "..", "..", "example.tsv")
 
 def _load_raw_cards(in_file):
-    next(in_file) # skip header
+    next(in_file, None) # skip header
     for line in in_file:
         parts = tuple(line.strip().split('\t'))
         assert len(parts) == 2
@@ -20,11 +20,11 @@ def _load_raw_cards(in_file):
 
 def _save_raw_cards_tsv(rows, out_file):
     for row in rows:
-        print >> out_file, "\t".join(row)
+        print("\t".join(row), file=out_file)
 
 def _save_raw_cards_csv(rows, out_file):
     for row in rows:
-        print >> out_file, ",".join(row)
+        print(",".join(row), file=out_file)
 
 def _minimal_call(args):
     with patch.object(files, 'save') as save_mock, \
@@ -34,56 +34,56 @@ def _minimal_call(args):
 
 def test_load_data_tsv(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(_example_path) as in_file, \
-         open(cards_path, 'w') as out_file:
+    with open(_example_path, encoding='utf-8') as in_file, \
+         open(cards_path, 'w', encoding='utf-8') as out_file:
         input_data = tuple(_load_raw_cards(in_file))
         _save_raw_cards_tsv(input_data, out_file)
 
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         got_data = tuple(_load_data(in_file, dialect='sniff-tsv', read_header=False))
     assert tuple((r['top'], r['bottom']) for r in got_data) == input_data
 
 def test_load_data_csv(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(_example_path) as in_file, \
-         open(cards_path, 'w') as out_file:
+    with open(_example_path, encoding='utf-8') as in_file, \
+         open(cards_path, 'w', encoding='utf-8') as out_file:
         input_data = tuple(_load_raw_cards(in_file))
         _save_raw_cards_csv(input_data, out_file)
 
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         got_data = tuple(_load_data(in_file, dialect='sniff-csv', read_header=False))
     assert tuple((r['top'], r['bottom']) for r in got_data) == input_data
 
 def test_load_data_read_header(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(_example_path) as in_file, \
-         open(cards_path, 'w') as out_file:
+    with open(_example_path, encoding='utf-8') as in_file, \
+         open(cards_path, 'w', encoding='utf-8') as out_file:
         input_data = tuple(_load_raw_cards(in_file))
-        print >> out_file, "bottom\ttop"
+        print("bottom\ttop", file=out_file)
         _save_raw_cards_tsv(((b, t) for t, b in input_data), out_file)
 
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         got_data = tuple(_load_data(in_file, dialect='sniff-tsv', read_header=True))
     assert tuple((r['top'], r['bottom']) for r in got_data) == input_data
 
 def test_load_data_read_header_unknown(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(cards_path, 'w') as out_file:
-        print >> out_file, "top\tx"
+    with open(cards_path, 'w', encoding='utf-8') as out_file:
+        print("top\tx", file=out_file)
 
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         with pytest.raises(ValueError, match=r"unknown.*field name"):
             tuple(_load_data(in_file, dialect='sniff-tsv', read_header=True))
 
 def test_basic(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(_example_path) as in_file:
+    with open(_example_path, encoding='utf-8') as in_file:
         input_data = tuple(_load_raw_cards(in_file))
 
     with patch.object(sys, 'argv', ["", _example_path, cards_path]):
         main()
 
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         deck = tuple(files.load(in_file))
     assert len(deck) == len(input_data)
     assert all(c.top == t and c.bottom == b for c, (t, b) in zip(deck, input_data))

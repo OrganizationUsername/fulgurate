@@ -35,9 +35,8 @@ def _load_data(in_file, dialect, read_header):
     if read_header:
         unknown_field_names = set(reader.fieldnames) - set(_INPUT_FIELD_NAMES)
         if unknown_field_names:
-            raise ValueError("unknown field names in input: %s" % (",".join(unknown_field_names)))
-    for row in reader:
-        yield row
+            raise ValueError(f"unknown field names in input: {','.join(unknown_field_names)}")
+    yield from reader
 
 def _import(in_file, out_file, now, csv_dialect, read_csv_header):
     data = _load_data(in_file, dialect=csv_dialect, read_header=read_csv_header)
@@ -69,10 +68,10 @@ def make_arg_parser():
         type=str,
         choices=[_SNIFF_TSV_DIALECT, _SNIFF_CSV_DIALECT] + csv.list_dialects(),
         default=_SNIFF_TSV_DIALECT,
-        help="The CSV dialect from Python's csv module to use for reading input cards. If %s " \
-             " then try to auto-detect a TSV dialect; if %s then try to auto-detect a CSV" \
-             " dialect. Defaults to %s." \
-             % (_SNIFF_TSV_DIALECT, _SNIFF_CSV_DIALECT, _DEFAULT_CSV_DIALECT)
+        help="The CSV dialect from Python's csv module to use for reading input cards. If"
+             " {_SNIFF_TSV_DIALECT} then try to auto-detect a TSV dialect; if"
+             " {_SNIFF_CSV_DIALECT} then try to auto-detect a CSV dialect. Defaults to"
+             " {_DEFAULT_CSV_DIALECT}."
     )
     arg_parser.add_argument(
         '-H',

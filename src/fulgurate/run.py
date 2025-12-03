@@ -11,7 +11,7 @@ __all__ = (
     'bulk_review',
 )
 
-class CardFetcher(object):
+class CardFetcher:
     def __init__(self, cards, now, max_reviews=None, max_new=None, randomize=False):
         """
         Manages choosing cards to practice successively. This is a base for
@@ -64,10 +64,7 @@ def run_cards(cards, now, review_card, max_reviews=None, max_new=None, randomize
 
     fetcher = CardFetcher(cards, now, max_reviews, max_new, randomize)
 
-    while True:
-        current = fetcher.choose_next()
-        if current is None:
-            break
+    while (current := fetcher.choose_next()) is not None:
         quality = review_card(current)
         current.repeat(quality, now)
         if current.is_new:

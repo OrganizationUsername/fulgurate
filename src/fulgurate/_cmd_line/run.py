@@ -22,17 +22,19 @@ from . import _ttyio, _args
 def _show_batch(cards):
     _ttyio.clear()
     for i, card in enumerate(cards):
-        print "%i: %s\r" % (i + 1, card.top)
-    print "\r"
+        print(f"{i + 1}: {card.top}\r")
+    print("\r")
 
-class _ExternalFilter(object):
+class _ExternalFilter:
     """
     Manages an external filter program.
     """
     def __init__(self, command):
+        # pylint: disable=consider-using-with
         self.proc = subprocess.Popen(
             command,
             shell=True,
+            encoding='utf-8',
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -42,17 +44,14 @@ class _ExternalFilter(object):
         """
         Send a card to the external filter program.
         """
-        print >> self.proc.stdin, "%s\t%s\t%s" % (card.filename or "", card.top, card.bottom)
+        print(f"{card.filename or ''}\t{card.top}\t{card.bottom}", file=self.proc.stdin)
         self.proc.stdin.flush()
 
     def receive(self):
         """
         Get result from the external filter.
         """
-        return tuple(
-            p.decode('string_escape')
-            for p in self.proc.stdout.readline().rstrip('\n').split('\t')
-        )
+        return tuple(self.proc.stdout.readline().rstrip('\n').split('\t'))
 
     def close(self):
         """
@@ -71,22 +70,21 @@ def _review_card(card, clear=True, wait=True, ext_filter=None, ext_finish=None):
             ext_filter.send_card(card)
             filename, top, bottom = ext_filter.receive()
         if filename:
-            print "%s\r" % (filename)
-        print "%s\r" % (top)
+            print(f"{filename}\r")
+        print(f"{top}\r")
         if wait:
             _ttyio.getch()
-        print "%s\r" % (bottom)
+        print(f"{bottom}\r")
         if ext_finish is not None:
             ext_finish.send_card(card)
         while True:
             in_char = _ttyio.getch()
             if in_char in ('0', '`'):
                 return 0
-            elif in_char in "12345":
+            if in_char in "12345":
                 return int(in_char)
 
 def _review_deck(deck, now, max_reviews, max_new, randomize, batch_size, ext_filter, ext_finish):
-    # pylint: disable=no-value-for-parameter
     try:
         with _ttyio.Unbuffered(sys.stdin):
             now = now.replace(hour=0, minute=0, second=0, microsecond=0)

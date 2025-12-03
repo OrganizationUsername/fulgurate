@@ -5,7 +5,7 @@ Flashcard data and core operations.
 import datetime
 import math
 
-class Card(object):
+class Card:
     """
     Flash card.
     """
@@ -37,7 +37,7 @@ class Card(object):
         """
         Do a repeatition of this card using SM-2.
         """
-        if not (quality >= 0 and quality <= 5):
+        if not 0 <= quality <= 5:
             raise ValueError("quality must be in 0-5")
         self.easiness = max(
             1.3,

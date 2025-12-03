@@ -1,4 +1,4 @@
 [MASTER]
 max-args = 10
 min-similarity-lines = 10
-disable = bad-continuation, missing-docstring
+disable = missing-docstring, too-many-positional-arguments

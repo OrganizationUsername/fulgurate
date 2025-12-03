@@ -18,7 +18,7 @@ def _check_decks_equal(input_deck, output_deck):
 def test_save_set_writer(tmpdir):
     cards_path = str(tmpdir / "cards")
     made = []
-    with open(cards_path, 'w') as out_file:
+    with open(cards_path, 'w', encoding='utf-8') as out_file:
         def make_writer(f):
             assert f == out_file
             made.append(None)
@@ -27,10 +27,10 @@ def test_save_set_writer(tmpdir):
 
 def test_load_set_reader(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(cards_path, 'w'):
+    with open(cards_path, 'w', encoding='utf-8'):
         pass
     made = []
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         def make_reader(f):
             assert f == in_file
             made.append(None)
@@ -47,9 +47,9 @@ def test_save_load(tmpdir):
         Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
     ]
 
-    with open(cards_path, 'w') as out_file:
+    with open(cards_path, 'w', encoding='utf-8') as out_file:
         files.save(input_deck, out_file)
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         output_deck = tuple(files.load(in_file))
 
     _check_decks_equal(input_deck, output_deck)
@@ -57,10 +57,10 @@ def test_save_load(tmpdir):
 def test_load_error(tmpdir):
     tsv_path = str(tmpdir / "cards")
 
-    with open(tsv_path, 'w') as out_file:
-        print >> out_file, "\t".join(["a", "b", "c"])
+    with open(tsv_path, 'w', encoding='utf-8') as out_file:
+        print("\t".join(["a", "b", "c"]), file=out_file)
 
-    with open(tsv_path) as in_file:
+    with open(tsv_path, encoding='utf-8') as in_file:
         with pytest.raises(Exception):
             tuple(files.load(in_file))
 

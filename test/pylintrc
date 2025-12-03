@@ -5,7 +5,6 @@ disable =
     missing-docstring,
     protected-access,
 		invalid-name,
-    old-style-class,
     redefined-outer-name,
 		len-as-condition,
 		too-few-public-methods,

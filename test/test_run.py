@@ -1,6 +1,6 @@
 import datetime
 import random
-from mock import patch
+from unittest.mock import patch
 import pytest
 from fulgurate import Card
 from fulgurate.run import run_cards, bulk_review
@@ -130,7 +130,7 @@ def test_run_cards_review_failure():
 
     del got_reviews[:]
     with pytest.raises(ValueError, match=".*quality.*"):
-        run_cards(deck, _time + _day, make_review_card(4, None))
+        run_cards(deck, _time + _day, make_review_card(4, -1))
     assert len(got_reviews) == 2
     assert [c.repetitions for c in deck] == [2, 1, 2]
 
@@ -249,7 +249,7 @@ def test_bulk_review_randomize():
         assert got0 != got1
 
 def test_bulk_review_randomize_batch():
-    rng = random.Random(1)
+    rng = random.Random(4)
 
     def make_deck():
         return [

@@ -9,7 +9,7 @@ import termios
 
 _CLEAR = os.popen("clear").read()
 
-class Unbuffered(object):
+class Unbuffered:
     """
     Context manager providing unbuffered IO.
     """
