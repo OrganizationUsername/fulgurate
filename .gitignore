@@ -5,3 +5,4 @@
 coverage.*
 /build
 /man
+uv.lock
