@@ -29,6 +29,10 @@ classifiers = [
     "Operating System :: Unix",
 ]
 dependencies = [
+]
+
+[project.optional-dependencies]
+cmd-line = [
     "python-dateutil ~= 2.9",
     "tabulate ~= 0.9",
 ]
