@@ -15,9 +15,9 @@ _cards_time = datetime.datetime(2022, 10, 18)
 def test_cards_path(tmpdir):
     cards_path = str(tmpdir / "cards")
     deck = [
-        Card("a", "b", _cards_time),
-        Card("c", "d", _cards_time),
-        Card("e", "f", _cards_time),
+        Card(top="a", bottom="b", last_repeat_time=_cards_time),
+        Card(top="c", bottom="d", last_repeat_time=_cards_time),
+        Card(top="e", bottom="f", last_repeat_time=_cards_time),
     ]
     deck[0].repeat(5, _cards_time)
     with open(cards_path, 'w', encoding='utf-8') as out_file:

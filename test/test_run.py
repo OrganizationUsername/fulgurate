@@ -21,13 +21,20 @@ def _make_review_tracker():
 def test_run_cards_basic():
     def make_deck():
         return [
-            Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("c", "d", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("e", "f", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("g", "h", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("i", "h", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("k", "l", _time, repetitions=1, interval=1.0, easiness=2.36),
-            Card("m", "n", _time, repetitions=2, interval=6.0, easiness=2.22),
+            Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="c", bottom="d", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="e", bottom="f", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="g", bottom="h", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="i", bottom="h", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="k", bottom="l", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.36),
+            Card(top="m", bottom="n", last_repeat_time=_time, repetitions=2, interval=6.0,
+                 easiness=2.22),
         ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -53,9 +60,12 @@ def test_run_cards_basic():
 
 def test_run_cards_max_reviews():
     deck = [
-        Card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -72,9 +82,12 @@ def test_run_cards_max_reviews():
 
 def test_run_cards_max_new():
     deck = [
-        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("c", "d", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("e", "f", _time, repetitions=1, interval=1.0, easiness=2.36),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
     ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -94,11 +107,16 @@ def test_run_cards_randomize():
 
     def make_deck():
         return [
-            Card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("e", "f", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("g", "h", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("i", "j", _time, repetitions=1, interval=1.0, easiness=2.5),
+            Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="e", bottom="f", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="g", bottom="h", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="i", bottom="j", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
         ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -121,9 +139,12 @@ def test_run_cards_review_failure():
     """
 
     deck = [
-        Card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -137,13 +158,20 @@ def test_run_cards_review_failure():
 def test_bulk_review_basic():
     def make_deck():
         return [
-            Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("c", "d", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("e", "f", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("g", "h", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("i", "h", _time, repetitions=0, interval=1.0, easiness=2.5),
-            Card("k", "l", _time, repetitions=1, interval=1.0, easiness=2.36),
-            Card("m", "n", _time, repetitions=2, interval=6.0, easiness=2.22),
+            Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="c", bottom="d", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="e", bottom="f", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="g", bottom="h", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="i", bottom="h", last_repeat_time=_time, repetitions=0, interval=1.0,
+                 easiness=2.5),
+            Card(top="k", bottom="l", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.36),
+            Card(top="m", bottom="n", last_repeat_time=_time, repetitions=2, interval=6.0,
+                 easiness=2.22),
         ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -153,7 +181,13 @@ def test_bulk_review_basic():
 
     del got_reviews[:], got_batches[:]
     deck = make_deck()
-    bulk_review(deck, _time, 2, show_batch, make_review_card(5, 5, 5, 5, 5))
+    bulk_review(
+        deck,
+        _time,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(5, 5, 5, 5, 5)
+    )
     assert len(got_reviews) == 5
     assert [len(b) for b in got_batches] == [2, 2, 1]
     assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
@@ -161,13 +195,25 @@ def test_bulk_review_basic():
 
     del got_reviews[:], got_batches[:]
     deck = make_deck()
-    bulk_review(deck, _time, 2, show_batch, make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5))
+    bulk_review(
+        deck,
+        _time,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(4, 0, 3, 1, 2, 5, 5, 1, 5),
+    )
     assert len(got_reviews) == 9
     assert [len(b) for b in got_batches] == [2, 2, 2, 2, 1]
     assert [c.repetitions for c in deck] == [1, 1, 1, 1, 1, 1, 2]
     assert [c.top for c in got_reviews] == ["a", "c", "c", "e", "e", "g", "e", "i", "i"]
     del got_reviews[:], got_batches[:]
-    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(5, 5, 5, 5, 5, 5))
+    bulk_review(
+        deck,
+        _time + _day,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(5, 5, 5, 5, 5, 5),
+    )
     assert len(got_reviews) == 6
     assert [len(b) for b in got_batches] == [2, 2, 2]
     assert [c.repetitions for c in deck] == [2, 2, 2, 2, 2, 2, 2]
@@ -175,9 +221,12 @@ def test_bulk_review_basic():
 
 def test_bulk_review_max_reviews():
     deck = [
-        Card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -185,20 +234,37 @@ def test_bulk_review_max_reviews():
         pass
 
     del got_reviews[:]
-    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(4, 5), max_reviews=0)
+    bulk_review(
+        deck,
+        _time + _day,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(4, 5),
+        max_reviews=0,
+    )
     assert len(got_reviews) == 0
     assert [c.repetitions for c in deck] == [1, 1, 2]
 
     del got_reviews[:]
-    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(4, 5), max_reviews=1)
+    bulk_review(
+        deck,
+        _time + _day,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(4, 5),
+        max_reviews=1,
+    )
     assert len(got_reviews) == 1
     assert [c.repetitions for c in deck] == [2, 1, 2]
 
 def test_bulk_review_max_new():
     deck = [
-        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("c", "d", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("e", "f", _time, repetitions=1, interval=1.0, easiness=2.36),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
     ]
 
     got_reviews, make_review_card = _make_review_tracker()
@@ -206,12 +272,26 @@ def test_bulk_review_max_new():
         pass
 
     del got_reviews[:]
-    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(4, 5, 5), max_new=0)
+    bulk_review(
+        deck,
+        _time + _day,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(4, 5, 5),
+        max_new=0,
+    )
     assert len(got_reviews) == 1
     assert [c.repetitions for c in deck] == [0, 0, 2]
 
     del got_reviews[:]
-    bulk_review(deck, _time + _day, 2, show_batch, make_review_card(4, 5, 5), max_new=1)
+    bulk_review(
+        deck,
+        _time + _day,
+        batch_size=2,
+        show_batch=show_batch,
+        review_card=make_review_card(4, 5, 5),
+        max_new=1,
+    )
     assert len(got_reviews) == 1
     assert [c.repetitions for c in deck] == [1, 0, 2]
 
@@ -220,11 +300,16 @@ def test_bulk_review_randomize():
 
     def make_deck():
         return [
-            Card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("e", "f", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("g", "h", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("i", "j", _time, repetitions=1, interval=1.0, easiness=2.5),
+            Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="e", bottom="f", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="g", bottom="h", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="i", bottom="j", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
         ]
 
     qualities = (3, 4, 5, 3, 4)
@@ -236,13 +321,27 @@ def test_bulk_review_randomize():
     with patch.object(random, 'shuffle', rng.shuffle):
         del got_reviews[:]
         deck = make_deck()
-        bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
-                    randomize=True, randomize_batch=False)
+        bulk_review(
+            deck,
+            _time + _day,
+            batch_size=2,
+            show_batch=show_batch,
+            review_card=make_review_card(*qualities),
+            randomize=True,
+            randomize_batch=False,
+        )
         got0 = [(c.top, c.bottom) for c in got_reviews]
         del got_reviews[:]
         deck = make_deck()
-        bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
-                    randomize=True, randomize_batch=False)
+        bulk_review(
+            deck,
+            _time + _day,
+            batch_size=2,
+            show_batch=show_batch,
+            review_card=make_review_card(*qualities),
+            randomize=True,
+            randomize_batch=False,
+        )
         got1 = [(c.top, c.bottom) for c in got_reviews]
         assert len(got0) > 0
         assert len(got1) > 0
@@ -253,9 +352,12 @@ def test_bulk_review_randomize_batch():
 
     def make_deck():
         return [
-            Card("a", "b", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.5),
-            Card("i", "j", _time, repetitions=1, interval=1.0, easiness=2.5),
+            Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
+            Card(top="i", bottom="j", last_repeat_time=_time, repetitions=1, interval=1.0,
+                 easiness=2.5),
         ]
 
     qualities = (3, 4, 5, 3, 4)
@@ -268,13 +370,25 @@ def test_bulk_review_randomize_batch():
     with patch.object(random, 'shuffle', rng.shuffle):
         del got_batches[:]
         deck = make_deck()
-        bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
-                    randomize_batch=True)
+        bulk_review(
+            deck,
+            _time + _day,
+            batch_size=2,
+            show_batch=show_batch,
+            review_card=make_review_card(*qualities),
+            randomize_batch=True,
+        )
         got0 = [[(c.top, c.bottom) for c in b] for b in got_batches]
         del got_batches[:]
         deck = make_deck()
-        bulk_review(deck, _time + _day, 2, show_batch, make_review_card(*qualities),
-                    randomize_batch=True)
+        bulk_review(
+            deck,
+            _time + _day,
+            batch_size=2,
+            show_batch=show_batch,
+            review_card=make_review_card(*qualities),
+            randomize_batch=True,
+        )
         got1 = [[(c.top, c.bottom) for c in b] for b in got_batches]
         assert len(got0) > 0
         assert len(got1) > 0

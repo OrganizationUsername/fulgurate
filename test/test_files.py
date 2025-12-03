@@ -42,9 +42,12 @@ def test_save_load(tmpdir):
     cards_path = str(tmpdir / "cards")
 
     input_deck = [
-        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
 
     with open(cards_path, 'w', encoding='utf-8') as out_file:
@@ -69,9 +72,12 @@ def test_save_all_load_all(tmpdir):
     cards_path1 = str(tmpdir / "cards1")
 
     input_deck = [
-        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
     input_deck[0].filename = cards_path0
     input_deck[1].filename = cards_path1

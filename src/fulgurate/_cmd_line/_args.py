@@ -1,7 +1,8 @@
 import datetime
+import argparse
 import dateutil.parser
 
-def add_now(arg_parser):
+def add_now(arg_parser: argparse.ArgumentParser) -> None:
     arg_parser.add_argument(
         '-n',
         '--now',

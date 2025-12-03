@@ -2,6 +2,7 @@
 Flashcard data and core operations.
 """
 
+from typing import Optional
 import datetime
 import math
 
@@ -10,47 +11,80 @@ class Card:
     Flash card.
     """
 
-    def __init__(self, top, bottom, last_repeat_time, repetitions=0, interval=1, easiness=2.5):
-        self.top = top
-        self.bottom = bottom
-        self.last_repeat_time = last_repeat_time.replace(second=0, microsecond=0)
-        self.repetitions = repetitions
-        self.interval = interval
-        self.easiness = easiness
-        self.filename = None # Reserved for use by {load,save}_all
+    def __init__(
+        self,
+        *,
+        top: str,
+        bottom: str,
+        last_repeat_time: datetime.datetime,
+        repetitions: int = 0,
+        interval: float = 1,
+        easiness: float = 2.5,
+    ):
+        self._top = top
+        self._bottom = bottom
+        self._last_repeat_time = last_repeat_time.replace(second=0, microsecond=0)
+        self._repetitions = repetitions
+        self._interval = interval
+        self._easiness = easiness
+        self.filename: Optional[str] = None # Reserved for use by {load,save}_all
 
     @property
-    def is_new(self):
+    def top(self) -> str:
+        return self._top
+
+    @property
+    def bottom(self) -> str:
+        return self._bottom
+
+    @property
+    def last_repeat_time(self) -> datetime.datetime:
+        return self._last_repeat_time
+
+    @property
+    def repetitions(self) -> int:
+        return self._repetitions
+
+    @property
+    def interval(self) -> float:
+        return self._interval
+
+    @property
+    def easiness(self) -> float:
+        return self._easiness
+
+    @property
+    def is_new(self) -> bool:
         """
         Is this a new card (ie has no repetitions).
         """
         return self.repetitions == 0
 
     @property
-    def next_time(self):
+    def next_time(self) -> datetime.datetime:
         """
         The time this card is currently scheduled for.
         """
-        return self.last_repeat_time + datetime.timedelta(days=math.ceil(self.interval))
+        return self._last_repeat_time + datetime.timedelta(days=math.ceil(self._interval))
 
-    def repeat(self, quality, now):
+    def repeat(self, quality: int, now: datetime.datetime) -> None:
         """
         Do a repeatition of this card using SM-2.
         """
         if not 0 <= quality <= 5:
             raise ValueError("quality must be in 0-5")
-        self.easiness = max(
+        self._easiness = max(
             1.3,
-            self.easiness + 0.1 - (5.0 - quality) * (0.08 + (5.0 - quality) * 0.02)
+            self._easiness + 0.1 - (5.0 - quality) * (0.08 + (5.0 - quality) * 0.02)
         )
         if quality < 3:
-            self.repetitions = 0
+            self._repetitions = 0
         else:
-            self.repetitions += 1
-        if self.repetitions == 1:
-            self.interval = 1
-        elif self.repetitions == 2:
-            self.interval = 6
-        elif self.repetitions > 2:
-            self.interval *= self.easiness
-        self.last_repeat_time = now
+            self._repetitions += 1
+        if self._repetitions == 1:
+            self._interval = 1
+        elif self._repetitions == 2:
+            self._interval = 6
+        elif self._repetitions > 2:
+            self._interval *= self._easiness
+        self._last_repeat_time = now

@@ -12,26 +12,34 @@ through 5 respectively, indicating your evaluation of how well you remembered
 the answer. 0 through 2 are failure responses and 3 through 5 are success.
 """
 
+from typing import Optional, Iterable, NamedTuple
 import sys
 import os
 import subprocess
+import datetime
 import argparse
+from .._card import Card
 from .. import files, run
 from . import _ttyio, _args
 
-def _show_batch(cards):
+def _show_batch(cards: Iterable[Card]) -> None:
     _ttyio.clear()
     for i, card in enumerate(cards):
         print(f"{i + 1}: {card.top}\r")
     print("\r")
 
+class _ExternalFilterRow(NamedTuple):
+    filename: str
+    top: str
+    bottom: str
+
 class _ExternalFilter:
     """
     Manages an external filter program.
     """
-    def __init__(self, command):
+    def __init__(self, command: str) -> None:
         # pylint: disable=consider-using-with
-        self.proc = subprocess.Popen(
+        self._proc = subprocess.Popen(
             command,
             shell=True,
             encoding='utf-8',
@@ -40,27 +48,40 @@ class _ExternalFilter:
             stderr=subprocess.PIPE,
         )
 
-    def send_card(self, card):
+    def send_card(self, card: Card) -> None:
         """
         Send a card to the external filter program.
         """
-        print(f"{card.filename or ''}\t{card.top}\t{card.bottom}", file=self.proc.stdin)
-        self.proc.stdin.flush()
+        assert self._proc.stdin is not None
+        print(f"{card.filename or ''}\t{card.top}\t{card.bottom}", file=self._proc.stdin)
+        self._proc.stdin.flush()
 
-    def receive(self):
+    def receive(self) -> _ExternalFilterRow:
         """
         Get result from the external filter.
         """
-        return tuple(self.proc.stdout.readline().rstrip('\n').split('\t'))
+        assert self._proc.stdout is not None
+        got = tuple(self._proc.stdout.readline().rstrip('\n').split('\t'))
+        if len(got) != 3:
+            raise ValueError("wrong number of values on line from external filter")
+        return _ExternalFilterRow(*got)
 
-    def close(self):
+    def close(self) -> None:
         """
         Close the program.
         """
-        self.proc.stdin.close()
-        os.waitpid(self.proc.pid, 0)
+        assert self._proc.stdin is not None
+        self._proc.stdin.close()
+        os.waitpid(self._proc.pid, 0)
 
-def _review_card(card, clear=True, wait=True, ext_filter=None, ext_finish=None):
+def _review_card(
+    card: Card,
+    *,
+    clear: bool = True,
+    wait: bool = True,
+    ext_filter: Optional[_ExternalFilter] = None,
+    ext_finish: Optional[_ExternalFilter] = None,
+) -> int:
     if clear:
         _ttyio.clear()
     with _ttyio.Unbuffered(sys.stdin):
@@ -84,7 +105,17 @@ def _review_card(card, clear=True, wait=True, ext_filter=None, ext_finish=None):
             if in_char in "12345":
                 return int(in_char)
 
-def _review_deck(deck, now, max_reviews, max_new, randomize, batch_size, ext_filter, ext_finish):
+def _review_deck(
+    deck: Iterable[Card],
+    *,
+    now: datetime.datetime,
+    max_reviews: int,
+    max_new: int,
+    randomize: bool,
+    batch_size: Optional[int],
+    ext_filter: Optional[_ExternalFilter],
+    ext_finish: Optional[_ExternalFilter] = None,
+) -> None:
     try:
         with _ttyio.Unbuffered(sys.stdin):
             now = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -105,9 +136,9 @@ def _review_deck(deck, now, max_reviews, max_new, randomize, batch_size, ext_fil
                 run.bulk_review(
                     deck,
                     now,
-                    batch_size,
-                    _show_batch,
-                    lambda *args: _review_card(
+                    batch_size=batch_size,
+                    show_batch=_show_batch,
+                    review_card=lambda *args: _review_card(
                         *args,
                         clear=False,
                         wait=False,
@@ -124,7 +155,7 @@ def _review_deck(deck, now, max_reviews, max_new, randomize, batch_size, ext_fil
     finally:
         files.save_all(deck)
 
-def make_arg_parser():
+def make_arg_parser() -> argparse.ArgumentParser:
     arg_parser = argparse.ArgumentParser(description=__doc__.strip())
     arg_parser.add_argument(
         'input_paths',
@@ -192,7 +223,7 @@ def make_arg_parser():
     )
     return arg_parser
 
-def main():
+def main() -> None:
     """
     Entry point.
     """

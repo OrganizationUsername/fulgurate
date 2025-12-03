@@ -16,9 +16,9 @@ _cards_time = datetime.datetime(2022, 10, 18)
 def test_cards_path(tmpdir):
     cards_path = str(tmpdir / "cards")
     deck = [
-        Card("a", "b", _cards_time),
-        Card("c", "d", _cards_time),
-        Card("e", "f", _cards_time),
+        Card(top="a", bottom="b", last_repeat_time=_cards_time),
+        Card(top="c", bottom="d", last_repeat_time=_cards_time),
+        Card(top="e", bottom="f", last_repeat_time=_cards_time),
     ]
     with open(cards_path, 'w', encoding='utf-8') as out_file:
         files.save(deck, out_file)
@@ -49,9 +49,9 @@ def _assert_run_cards_called_once_with(mock, *, cards=ANY, now=ANY, review_card=
 def _assert_bulk_review_called_once_with(mock, *, cards=ANY, now=ANY, batch_size=ANY,
                                          show_batch=ANY, review_card=ANY, max_reviews=ANY,
                                          max_new=ANY, randomize=ANY, randomize_batch=ANY):
-    mock.assert_called_once_with(cards, now, batch_size, show_batch, review_card,
-                                 max_reviews=max_reviews, max_new=max_new, randomize=randomize,
-                                 randomize_batch=randomize_batch)
+    mock.assert_called_once_with(cards, now, batch_size=batch_size, show_batch=show_batch,
+                                 review_card=review_card, max_reviews=max_reviews, max_new=max_new,
+                                 randomize=randomize, randomize_batch=randomize_batch)
 
 def _assert_review_card_called_with(mock, card=ANY, ext_filter=ANY, ext_finish=ANY):
     mock.assert_called_with(card, ext_filter=ext_filter, ext_finish=ext_finish)
@@ -112,9 +112,9 @@ def test_run_set_batch_size(test_cards_path):
     _assert_bulk_review_called_once_with(bulk_review_mock, batch_size=56, randomize_batch=True)
 
 def test_external_filter():
-    card0 = Card("abc", "def", _cards_time)
+    card0 = Card(top="abc", bottom="def", last_repeat_time=_cards_time)
     card0.filename = "file0"
-    card1 = Card("efg", "hij", _cards_time)
+    card1 = Card(top="efg", bottom="hij", last_repeat_time=_cards_time)
     card1.filename = "file1"
 
     f = _ExternalFilter("rev")
