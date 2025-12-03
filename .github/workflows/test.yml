@@ -16,3 +16,5 @@ jobs:
       run: pip install tox
     - name: Run tox
       run: tox
+    - name: Run make
+      run: make
