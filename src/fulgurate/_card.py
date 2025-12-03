@@ -3,6 +3,7 @@ Flashcard data and core operations.
 """
 
 from typing import Optional
+from pathlib import Path
 import datetime
 import math
 
@@ -27,7 +28,7 @@ class Card:
         self._repetitions = repetitions
         self._interval = interval
         self._easiness = easiness
-        self.filename: Optional[str] = None # Reserved for use by {load,save}_all
+        self.path: Optional[Path] = None # Reserved for use by {load,save}_all
 
     @property
     def top(self) -> str:

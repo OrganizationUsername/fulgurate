@@ -1,3 +1,4 @@
+from pathlib import Path
 import sys
 import io
 import datetime
@@ -113,9 +114,9 @@ def test_run_set_batch_size(test_cards_path):
 
 def test_external_filter():
     card0 = Card(top="abc", bottom="def", last_repeat_time=_cards_time)
-    card0.filename = "file0"
+    card0.path = Path("file0")
     card1 = Card(top="efg", bottom="hij", last_repeat_time=_cards_time)
-    card1.filename = "file1"
+    card1.path = Path("file1")
 
     f = _ExternalFilter("rev")
     f.send_card(card0)

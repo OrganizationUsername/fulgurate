@@ -2,7 +2,8 @@
 Cards file IO.
 """
 
-from typing import Callable, Optional, Iterable, TextIO
+from typing import Callable, Union, Optional, Iterable, TextIO
+from pathlib import Path
 import sys
 import datetime
 import csv
@@ -105,29 +106,30 @@ def save_all(
     encoding: str = 'utf-8'
 ) -> None:
     """
-    Given cards with the filename field set, save them to their respectively files.
+    Given cards with the path field set, save them to their respectively files.
     """
     outputs = {}
     with ExitStack() as file_stack:
         for card in cards:
-            if card.filename is not None:
-                if card.filename not in outputs:
+            if card.path is not None:
+                if card.path not in outputs:
                     # pylint: disable=consider-using-with
-                    out_file = open(card.filename, 'w', newline='', encoding=encoding)
-                    outputs[card.filename] = file_stack.enter_context(out_file)
-                save([card], outputs[card.filename], make_writer=make_writer)
+                    out_file = open(card.path, 'w', newline='', encoding=encoding)
+                    outputs[card.path] = file_stack.enter_context(out_file)
+                save([card], outputs[card.path], make_writer=make_writer)
 
 def load_all(
-    filenames: Iterable[str],
+    paths: Iterable[Union[Path, str]],
     *,
     make_reader: Optional[MakeReader] = None,
     encoding: str = 'utf-8',
 ) -> Iterable[Card]:
     """
-    Load cards from multiple files, with the filename field set.
+    Load cards from multiple files, with the path field set.
     """
-    for filename in filenames:
-        with open(filename, newline='', encoding=encoding) as in_file:
+    for path in paths:
+        path = Path(path)
+        with open(path, newline='', encoding=encoding) as in_file:
             for card in load(in_file, make_reader=make_reader):
-                card.filename = filename
+                card.path = path
                 yield card

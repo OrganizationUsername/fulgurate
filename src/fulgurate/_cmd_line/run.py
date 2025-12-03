@@ -29,7 +29,7 @@ def _show_batch(cards: Iterable[Card]) -> None:
     print("\r")
 
 class _ExternalFilterRow(NamedTuple):
-    filename: str
+    path: str
     top: str
     bottom: str
 
@@ -53,7 +53,7 @@ class _ExternalFilter:
         Send a card to the external filter program.
         """
         assert self._proc.stdin is not None
-        print(f"{card.filename or ''}\t{card.top}\t{card.bottom}", file=self._proc.stdin)
+        print(f"{str(card.path) or ''}\t{card.top}\t{card.bottom}", file=self._proc.stdin)
         self._proc.stdin.flush()
 
     def receive(self) -> _ExternalFilterRow:
@@ -86,12 +86,12 @@ def _review_card(
         _ttyio.clear()
     with _ttyio.Unbuffered(sys.stdin):
         if ext_filter is None:
-            filename, top, bottom = card.filename, card.top, card.bottom
+            path, top, bottom = str(card.path), card.top, card.bottom
         else:
             ext_filter.send_card(card)
-            filename, top, bottom = ext_filter.receive()
-        if filename:
-            print(f"{filename}\r")
+            path, top, bottom = ext_filter.receive()
+        if path:
+            print(f"{path}\r")
         print(f"{top}\r")
         if wait:
             _ttyio.getch()
@@ -203,7 +203,7 @@ def make_arg_parser() -> argparse.ArgumentParser:
         default=None,
         help="""
             Set a command to filter cards. It should take on stdin a sequence
-            of card data lines consisting of filename, first field, and second
+            of card data lines consisting of path, first field, and second
             field, separated by tabs. It should output to stdout new card data
             in the same format, which will be shown instead of the original
             card data.
