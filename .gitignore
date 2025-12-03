@@ -3,4 +3,5 @@
 .tox
 .coverage
 coverage.*
+/build
 /man

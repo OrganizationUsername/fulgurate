@@ -3,7 +3,7 @@ BINPREFIX?=$(PREFIX)/bin
 LIBPREFIX?=$(PREFIX)/lib/fulgurate
 MANPREFIX?=$(PREFIX)/man
 DOCPREFIX?=$(PREFIX)/share/doc/fulgurate
-PYTHON?=python2
+PYTHON?=python3
 A2X?=a2x
 
 VENV=venv.make
@@ -11,7 +11,7 @@ MANOUT=man
 MANPROGS=$(addprefix fulgurate-, run import-cards show-schedule)
 MANPAGES=$(addsuffix .1, $(MANPROGS))
 DOCS=example.tsv example-filter.sh example-finish.sh
-PYTHTONREQS=tox argparse-manpage
+PYTHONREQS=setuptools tox argparse-manpage
 
 all: test man
 
@@ -20,8 +20,9 @@ $(VENV)/.sentinel:
 	$(PYTHON) -m virtualenv $(VENV)
 	( \
 		source $(VENV)/bin/activate; \
-		pip install --upgrade $(PYTHTONREQS) \
-		pip install --upgrade . \
+		pip install --upgrade pip; \
+		pip install --upgrade $(PYTHONREQS); \
+		pip install --upgrade .[cmd-line] \
 	)
 
 test: $(VENV)/.sentinel
