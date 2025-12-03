@@ -1,0 +1,135 @@
+import sys
+import os.path
+import datetime
+from mock import patch, Mock, ANY
+import pytest
+from fulgurate import files
+from fulgurate._cmd_line import import_cards as cmd_line_import_cards
+from fulgurate._cmd_line.import_cards import main, _load_data
+from ._shared import FixNowDatetime
+
+_time_fmt = "%Y-%m-%d"
+_example_path = os.path.join(os.path.dirname(__file__), "..", "..", "example.tsv")
+
+def _load_raw_cards(in_file):
+    next(in_file) # skip header
+    for line in in_file:
+        parts = tuple(line.strip().split('\t'))
+        assert len(parts) == 2
+        yield parts
+
+def _save_raw_cards_tsv(rows, out_file):
+    for row in rows:
+        print >> out_file, "\t".join(row)
+
+def _save_raw_cards_csv(rows, out_file):
+    for row in rows:
+        print >> out_file, ",".join(row)
+
+def _minimal_call(args):
+    with patch.object(files, 'save') as save_mock, \
+         patch.object(sys, 'argv', [""] + list(args)):
+        main()
+    return save_mock
+
+def test_load_data_tsv(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with open(_example_path) as in_file, \
+         open(cards_path, 'w') as out_file:
+        input_data = tuple(_load_raw_cards(in_file))
+        _save_raw_cards_tsv(input_data, out_file)
+
+    with open(cards_path) as in_file:
+        got_data = tuple(_load_data(in_file, dialect='sniff-tsv', read_header=False))
+    assert tuple((r['top'], r['bottom']) for r in got_data) == input_data
+
+def test_load_data_csv(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with open(_example_path) as in_file, \
+         open(cards_path, 'w') as out_file:
+        input_data = tuple(_load_raw_cards(in_file))
+        _save_raw_cards_csv(input_data, out_file)
+
+    with open(cards_path) as in_file:
+        got_data = tuple(_load_data(in_file, dialect='sniff-csv', read_header=False))
+    assert tuple((r['top'], r['bottom']) for r in got_data) == input_data
+
+def test_load_data_read_header(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with open(_example_path) as in_file, \
+         open(cards_path, 'w') as out_file:
+        input_data = tuple(_load_raw_cards(in_file))
+        print >> out_file, "bottom\ttop"
+        _save_raw_cards_tsv(((b, t) for t, b in input_data), out_file)
+
+    with open(cards_path) as in_file:
+        got_data = tuple(_load_data(in_file, dialect='sniff-tsv', read_header=True))
+    assert tuple((r['top'], r['bottom']) for r in got_data) == input_data
+
+def test_load_data_read_header_unknown(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with open(cards_path, 'w') as out_file:
+        print >> out_file, "top\tx"
+
+    with open(cards_path) as in_file:
+        with pytest.raises(ValueError, match=r"unknown.*field name"):
+            tuple(_load_data(in_file, dialect='sniff-tsv', read_header=True))
+
+def test_basic(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with open(_example_path) as in_file:
+        input_data = tuple(_load_raw_cards(in_file))
+
+    with patch.object(sys, 'argv', ["", _example_path, cards_path]):
+        main()
+
+    with open(cards_path) as in_file:
+        deck = tuple(files.load(in_file))
+    assert len(deck) == len(input_data)
+    assert all(c.top == t and c.bottom == b for c, (t, b) in zip(deck, input_data))
+    assert all(c.is_new for c in deck)
+    assert all(c.repetitions == 0 for c in deck)
+
+def test_no_set_time(tmpdir):
+    now_time = datetime.datetime(2021, 12, 24)
+    cards_path = str(tmpdir / "cards")
+    with patch.object(datetime, 'datetime', FixNowDatetime(now_time)):
+        save_mock = _minimal_call([str(_example_path), str(cards_path)])
+    assert all(c.last_repeat_time == now_time for c in save_mock.call_args[1])
+
+def test_set_time(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    set_time = datetime.datetime(2022, 10, 18)
+    save_mock = _minimal_call([
+        "-n", set_time.strftime(_time_fmt),
+        str(_example_path),
+        str(cards_path),
+    ])
+    assert all(c.last_repeat_time == set_time for c in save_mock.call_args[1])
+
+def test_set_dialect(tmpdir):
+    cards_path = str(tmpdir / "cards")
+
+    with patch.object(cmd_line_import_cards, '_load_data', Mock(return_value=[])) as load_data_mock:
+        _minimal_call([str(_example_path), str(cards_path), "-d", "excel"])
+    load_data_mock.assert_called_with(ANY, dialect="excel", read_header=ANY)
+
+    with patch.object(cmd_line_import_cards, '_load_data', Mock(return_value=[])) as load_data_mock:
+        _minimal_call([str(_example_path), str(cards_path), "-d", "excel-tab"])
+    load_data_mock.assert_called_with(ANY, dialect="excel-tab", read_header=ANY)
+
+def test_set_dialect_unknown(tmpdir):
+    cards_path = str(tmpdir / "cards")
+    with pytest.raises(SystemExit):
+        _minimal_call([str(_example_path), str(cards_path), "-d", "x"])
+
+def test_set_read_headers(tmpdir):
+    cards_path = str(tmpdir / "cards")
+
+    with patch.object(cmd_line_import_cards, '_load_data', Mock(return_value=[])) as load_data_mock:
+        _minimal_call([str(_example_path), str(cards_path)])
+    load_data_mock.assert_called_with(ANY, dialect=ANY, read_header=True)
+
+    with patch.object(cmd_line_import_cards, '_load_data', Mock(return_value=[])) as load_data_mock:
+        _minimal_call([str(_example_path), str(cards_path), "-H"])
+    load_data_mock.assert_called_with(ANY, dialect=ANY, read_header=False)
