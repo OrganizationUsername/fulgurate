@@ -22,23 +22,6 @@ class build_manpages_proxy(Command):
         self._instance.run()
 
 setup(
-    name="fulgurate",
-    version="2.0.0",
-    python_requires=">=3.8",
-    url="https://github.com/theq629/fulgurate",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
-    entry_points={
-        "console_scripts": [
-            "fulgurate-run=fulgurate._cmd_line.run:main",
-            "fulgurate-import-cards=fulgurate._cmd_line.import_cards:main",
-            "fulgurate-show-schedule=fulgurate._cmd_line.show_schedule:main",
-        ],
-    },
-    install_requires=[
-        "python-dateutil ~= 2.9",
-        "tabulate ~= 0.9",
-    ],
     cmdclass={
         'build_manpages': build_manpages_proxy,
     },
