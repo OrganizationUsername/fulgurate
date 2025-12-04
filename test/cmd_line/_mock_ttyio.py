@@ -1,5 +1,5 @@
 import contextlib
-from mock import patch
+from unittest.mock import patch
 import fulgurate._cmd_line._ttyio
 
 @contextlib.contextmanager
@@ -15,10 +15,10 @@ class _MockedTtyio:
         return next(self._input_keys)
 
     def _clear(self):
-        print self._clear_output
+        print(self._clear_output)
 
 @contextlib.contextmanager
-def mock_ttyio(input_keys, clear_output=""):
+def mock_ttyio(input_keys, clear_output=b""):
     mock = _MockedTtyio(input_keys, clear_output)
     with patch.object(fulgurate._cmd_line._ttyio, 'getch', mock._getch), \
          patch.object(fulgurate._cmd_line._ttyio, 'clear', mock._clear), \

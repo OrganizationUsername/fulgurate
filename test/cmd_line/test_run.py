@@ -1,7 +1,8 @@
+from pathlib import Path
 import sys
 import io
 import datetime
-from mock import patch, Mock, ANY
+from unittest.mock import patch, Mock, ANY
 import pytest
 from fulgurate import Card, files, run
 from fulgurate._cmd_line import run as cmd_line_run
@@ -16,11 +17,11 @@ _cards_time = datetime.datetime(2022, 10, 18)
 def test_cards_path(tmpdir):
     cards_path = str(tmpdir / "cards")
     deck = [
-        Card("a", "b", _cards_time),
-        Card("c", "d", _cards_time),
-        Card("e", "f", _cards_time),
+        Card(top="a", bottom="b", last_repeat_time=_cards_time),
+        Card(top="c", bottom="d", last_repeat_time=_cards_time),
+        Card(top="e", bottom="f", last_repeat_time=_cards_time),
     ]
-    with open(cards_path, 'w') as out_file:
+    with open(cards_path, 'w', encoding='utf-8') as out_file:
         files.save(deck, out_file)
     return cards_path
 
@@ -41,17 +42,17 @@ def _minimal_real_call(args, key_inputs=()):
         main()
     return review_card_mock, external_filter_mock
 
-def _assert_run_cards_called_once_with(mock, cards=ANY, now=ANY, review_card=ANY, max_reviews=ANY,
-                                       max_new=ANY, randomize=ANY):
+def _assert_run_cards_called_once_with(mock, *, cards=ANY, now=ANY, review_card=ANY,
+                                       max_reviews=ANY, max_new=ANY, randomize=ANY):
     mock.assert_called_once_with(cards, now, review_card, max_reviews=max_reviews, max_new=max_new,
                                  randomize=randomize)
 
-def _assert_bulk_review_called_once_with(mock, cards=ANY, now=ANY, batch_size=ANY, show_batch=ANY,
-                                         review_card=ANY, max_reviews=ANY, max_new=ANY,
-                                         randomize=ANY, randomize_batch=ANY):
-    mock.assert_called_once_with(cards, now, batch_size, show_batch, review_card,
-                                 max_reviews=max_reviews, max_new=max_new, randomize=randomize,
-                                 randomize_batch=randomize_batch)
+def _assert_bulk_review_called_once_with(mock, *, cards=ANY, now=ANY, batch_size=ANY,
+                                         show_batch=ANY, review_card=ANY, max_reviews=ANY,
+                                         max_new=ANY, randomize=ANY, randomize_batch=ANY):
+    mock.assert_called_once_with(cards, now, batch_size=batch_size, show_batch=show_batch,
+                                 review_card=review_card, max_reviews=max_reviews, max_new=max_new,
+                                 randomize=randomize, randomize_batch=randomize_batch)
 
 def _assert_review_card_called_with(mock, card=ANY, ext_filter=ANY, ext_finish=ANY):
     mock.assert_called_with(card, ext_filter=ext_filter, ext_finish=ext_finish)
@@ -59,26 +60,26 @@ def _assert_review_card_called_with(mock, card=ANY, ext_filter=ANY, ext_finish=A
 def test_run_basic(test_cards_path):
     set_time = _cards_time
     set_time_str = set_time.strftime(_time_fmt)
-    with open(test_cards_path) as in_file:
+    with open(test_cards_path, encoding='utf-8') as in_file:
         deck = list(files.load(in_file))
 
     # Note: make sure we test both keys for quality 0
     key_inputs = ["x", "`"] * (len(deck) - 1) + ["x", "0"] + ["x", "1"] * len(deck) \
         + ["x", "2"] * len(deck) + ["y", "3", "y", "4", "y", "5"]
-    out_file = io.BytesIO()
+    out_file = io.StringIO()
     with mock_ttyio(key_inputs, "CLEAR"), \
-         patch.object(sys, 'stdout', io.BytesIO()) as out_file, \
+         patch.object(sys, 'stdout', io.StringIO()) as out_file, \
          patch.object(sys, 'argv', ["", "-n", set_time_str, str(test_cards_path)]):
         main()
 
-    output = zip(*([iter(out_file.getvalue().splitlines())] * 4))
+    output = list(zip(*([iter(out_file.getvalue().splitlines())] * 4)))
     assert len(output) == len(deck) * 4
     for (got_clear_line, got_cards_line, got_top, got_bot), want_card in zip(output, deck):
         assert got_clear_line == "CLEAR"
         assert got_cards_line == test_cards_path
         assert got_top == want_card.top
         assert got_bot == want_card.bottom
-    with open(test_cards_path) as in_file:
+    with open(test_cards_path, encoding='utf-8') as in_file:
         new_deck = tuple(files.load(in_file))
         assert new_deck[0].easiness <= new_deck[1].easiness < new_deck[2].easiness \
             < min(c.easiness for c in deck)
@@ -112,10 +113,10 @@ def test_run_set_batch_size(test_cards_path):
     _assert_bulk_review_called_once_with(bulk_review_mock, batch_size=56, randomize_batch=True)
 
 def test_external_filter():
-    card0 = Card("abc", "def", _cards_time)
-    card0.filename = "file0"
-    card1 = Card("efg", "hij", _cards_time)
-    card1.filename = "file1"
+    card0 = Card(top="abc", bottom="def", last_repeat_time=_cards_time)
+    card0.path = Path("file0")
+    card1 = Card(top="efg", bottom="hij", last_repeat_time=_cards_time)
+    card1.path = Path("file1")
 
     f = _ExternalFilter("rev")
     f.send_card(card0)

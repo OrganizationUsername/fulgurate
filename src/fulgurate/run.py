@@ -2,17 +2,31 @@
 Management of practice cycle for cards.
 """
 
+from typing import Callable, Optional, Iterable
 import random
+import datetime
 import itertools
+from ._card import Card
 
 __all__ = (
+    'ReviewCard',
     'CardFetcher',
     'run_cards',
     'bulk_review',
 )
 
-class CardFetcher(object):
-    def __init__(self, cards, now, max_reviews=None, max_new=None, randomize=False):
+ReviewCard = Callable[[Card], int]
+
+class CardFetcher:
+    def __init__(
+        self,
+        cards: Iterable[Card],
+        now: datetime.datetime,
+        *,
+        max_reviews: Optional[int] = None,
+        max_new: Optional[int] = None,
+        randomize: bool = False,
+    ):
         """
         Manages choosing cards to practice successively. This is a base for
         making practice systems.
@@ -31,7 +45,7 @@ class CardFetcher(object):
         if randomize:
             random.shuffle(self._to_review)
 
-    def choose_next(self):
+    def choose_next(self) -> Optional[Card]:
         """
         Get the next card to review, or `None` if there are none left to review.
         """
@@ -41,7 +55,7 @@ class CardFetcher(object):
             return self._new_cards.pop()
         return None
 
-    def reject_card(self, card):
+    def reject_card(self, card: Card) -> None:
         """
         Reject card, putting it back for further practice in this run.
         """
@@ -50,7 +64,15 @@ class CardFetcher(object):
         else:
             self._to_review.insert(0, card)
 
-def run_cards(cards, now, review_card, max_reviews=None, max_new=None, randomize=False):
+def run_cards(
+    cards: Iterable[Card],
+    now: datetime.datetime,
+    review_card: ReviewCard,
+    *,
+    max_reviews: Optional[int] = None,
+    max_new: Optional[int] = None,
+    randomize: bool = False,
+) -> None:
     """
     Review cards one a time.
 
@@ -62,28 +84,32 @@ def run_cards(cards, now, review_card, max_reviews=None, max_new=None, randomize
     quality for the repetition. This function can manage any UI for the review.
     """
 
-    fetcher = CardFetcher(cards, now, max_reviews, max_new, randomize)
+    fetcher = CardFetcher(
+        cards,
+        now,
+        max_reviews=max_reviews,
+        max_new=max_new,
+        randomize=randomize,
+    )
 
-    while True:
-        current = fetcher.choose_next()
-        if current is None:
-            break
+    while (current := fetcher.choose_next()) is not None:
         quality = review_card(current)
         current.repeat(quality, now)
         if current.is_new:
             fetcher.reject_card(current)
 
 def bulk_review(
-    cards,
-    now,
-    batch_size,
-    show_batch,
-    review_card,
-    max_reviews=None,
-    max_new=None,
-    randomize=False,
-    randomize_batch=False,
-):
+    cards: Iterable[Card],
+    now: datetime.datetime,
+    *,
+    review_card: ReviewCard,
+    batch_size: int,
+    show_batch: Callable[[Iterable[Card]], None],
+    max_reviews: Optional[int] = None,
+    max_new: Optional[int] = None,
+    randomize: bool = False,
+    randomize_batch: bool = False,
+) -> None:
     """
     Review cards in batches.
 
@@ -100,9 +126,15 @@ def bulk_review(
     review.
     """
 
-    fetcher = CardFetcher(cards, now, max_reviews, max_new, randomize)
+    fetcher = CardFetcher(
+        cards,
+        now,
+        max_reviews=max_reviews,
+        max_new=max_new,
+        randomize=randomize,
+    )
 
-    def run_card(card):
+    def run_card(card: Card) -> int:
         quality = review_card(card)
         card.repeat(quality, now)
         return quality
@@ -118,7 +150,7 @@ def bulk_review(
         batch = [c for c in batch if c.is_new]
 
         while len(batch) < batch_size:
-            card = fetcher.choose_next()
-            if card is None:
+            next_card = fetcher.choose_next()
+            if next_card is None:
                 break
-            batch.append(card)
+            batch.append(next_card)

@@ -1,3 +1,4 @@
+from pathlib import Path
 import datetime
 import pytest
 from fulgurate import Card, files
@@ -18,7 +19,7 @@ def _check_decks_equal(input_deck, output_deck):
 def test_save_set_writer(tmpdir):
     cards_path = str(tmpdir / "cards")
     made = []
-    with open(cards_path, 'w') as out_file:
+    with open(cards_path, 'w', encoding='utf-8') as out_file:
         def make_writer(f):
             assert f == out_file
             made.append(None)
@@ -27,10 +28,10 @@ def test_save_set_writer(tmpdir):
 
 def test_load_set_reader(tmpdir):
     cards_path = str(tmpdir / "cards")
-    with open(cards_path, 'w'):
+    with open(cards_path, 'w', encoding='utf-8'):
         pass
     made = []
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         def make_reader(f):
             assert f == in_file
             made.append(None)
@@ -42,14 +43,17 @@ def test_save_load(tmpdir):
     cards_path = str(tmpdir / "cards")
 
     input_deck = [
-        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
 
-    with open(cards_path, 'w') as out_file:
+    with open(cards_path, 'w', encoding='utf-8') as out_file:
         files.save(input_deck, out_file)
-    with open(cards_path) as in_file:
+    with open(cards_path, encoding='utf-8') as in_file:
         output_deck = tuple(files.load(in_file))
 
     _check_decks_equal(input_deck, output_deck)
@@ -57,10 +61,10 @@ def test_save_load(tmpdir):
 def test_load_error(tmpdir):
     tsv_path = str(tmpdir / "cards")
 
-    with open(tsv_path, 'w') as out_file:
-        print >> out_file, "\t".join(["a", "b", "c"])
+    with open(tsv_path, 'w', encoding='utf-8') as out_file:
+        print("\t".join(["a", "b", "c"]), file=out_file)
 
-    with open(tsv_path) as in_file:
+    with open(tsv_path, encoding='utf-8') as in_file:
         with pytest.raises(Exception):
             tuple(files.load(in_file))
 
@@ -69,13 +73,16 @@ def test_save_all_load_all(tmpdir):
     cards_path1 = str(tmpdir / "cards1")
 
     input_deck = [
-        Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5),
-        Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36),
-        Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22),
+        Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+             easiness=2.5),
+        Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+             easiness=2.36),
+        Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+             easiness=2.22),
     ]
-    input_deck[0].filename = cards_path0
-    input_deck[1].filename = cards_path1
-    input_deck[2].filename = cards_path0
+    input_deck[0].path = Path(cards_path0)
+    input_deck[1].path = Path(cards_path1)
+    input_deck[2].path = Path(cards_path0)
 
     files.save_all(input_deck)
     output_deck = list(files.load_all([cards_path0, cards_path1]))

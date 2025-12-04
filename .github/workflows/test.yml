@@ -9,10 +9,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
-    - uses: LizardByte/actions/actions/setup_python@master
+    - uses: actions/setup-python@v6
       with:
-        python-version: '2.7'
+        python-version: '3.13'
     - name: Install tox
       run: pip install tox
     - name: Run tox
       run: tox
+    - name: Run make
+      run: make

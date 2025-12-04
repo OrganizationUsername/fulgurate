@@ -1,0 +1,52 @@
+[project]
+name = "fulgurate"
+version = "2.0.0"
+requires-python = ">3.9"
+description = "Simple spaced repetition flashcard library plus terminal program."
+authors = [
+    {name = "Max Whitney", email = "max.e.whitney@gmail.com"},
+]
+readme = "README.md"
+license = "Apache-2.0"
+keywords = [
+    "flashcards",
+    "terminal",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Operating System :: Unix",
+    "Typing :: Typed",
+]
+dependencies = [
+]
+
+[project.optional-dependencies]
+cmd-line = [
+    "python-dateutil ~= 2.9",
+    "tabulate ~= 0.9",
+]
+
+[project.urls]
+Home = "https://github.com/theq629/fulgurate"
+Repository = "https://github.com/theq629/fulgurate"
+Documentation = "https://fulgurate.readthedocs.io/"
+
+[project.scripts]
+fulgurate-run = "fulgurate._cmd_line.run:main"
+fulgurate-import-cards = "fulgurate._cmd_line.import_cards:main"
+fulgurate-show-schedule = "fulgurate._cmd_line.show_schedule:main"
+
+[tool.setuptools.package-data]
+fulgurate = ["py.typed"]

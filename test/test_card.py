@@ -6,8 +6,8 @@ _eps = 0.001
 
 def _make_repetitions_cases(repetitions, interval, easiness):
     for i in range(0, 6):
-        card = Card("a", "b", _time, repetitions=repetitions, interval=interval,
-                    easiness=easiness)
+        card = Card(top="a", bottom="b", last_repeat_time=_time, repetitions=repetitions,
+                    interval=interval, easiness=easiness)
         card.repeat(i, _time)
         yield card.repetitions, card.interval, card.easiness
 
@@ -21,7 +21,8 @@ def _compare_repetitions_cases(got, want):
     )
 
 def test_new_card():
-    card = Card("a", "b", _time, repetitions=0, interval=1, easiness=2.5)
+    card = Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1,
+                easiness=2.5)
     assert card.top == "a"
     assert card.bottom == "b"
     assert card.last_repeat_time == _time
@@ -30,7 +31,8 @@ def test_new_card():
     assert card.easiness == 2.5
     assert card.is_new
 
-    card = Card("a", "b", _time, repetitions=1, interval=2.34, easiness=5.67)
+    card = Card(top="a", bottom="b", last_repeat_time=_time, repetitions=1, interval=2.34,
+                easiness=5.67)
     assert card.top == "a"
     assert card.bottom == "b"
     assert card.last_repeat_time == _time
@@ -68,16 +70,22 @@ def test_github_issue_1_wrong_interval_update():
     assert compare(_make_repetitions_cases(1, 12.48, 2.08), [12.48, 12.48, 12.48, 6, 6, 6])
 
 def test_next_time():
-    assert Card("a", "b", _time, repetitions=0, interval=1.0, easiness=2.5) \
+    assert Card(top="a", bottom="b", last_repeat_time=_time, repetitions=0, interval=1.0,
+                easiness=2.5) \
         .next_time == datetime.datetime(year=2022, month=10, day=19)
-    assert Card("c", "d", _time, repetitions=1, interval=1.0, easiness=2.36) \
+    assert Card(top="c", bottom="d", last_repeat_time=_time, repetitions=1, interval=1.0,
+                easiness=2.36) \
         .next_time == datetime.datetime(year=2022, month=10, day=19)
-    assert Card("e", "f", _time, repetitions=2, interval=6.0, easiness=2.22) \
+    assert Card(top="e", bottom="f", last_repeat_time=_time, repetitions=2, interval=6.0,
+                easiness=2.22) \
         .next_time == datetime.datetime(year=2022, month=10, day=24)
-    assert Card("e", "f", _time, repetitions=3, interval=12.48, easiness=2.08) \
+    assert Card(top="e", bottom="f", last_repeat_time=_time, repetitions=3, interval=12.48,
+                easiness=2.08) \
         .next_time == datetime.datetime(year=2022, month=10, day=31)
 
-    assert Card("e", "f", _time, repetitions=0, interval=12.48, easiness=0.0) \
+    assert Card(top="e", bottom="f", last_repeat_time=_time, repetitions=0, interval=12.48,
+                easiness=0.0) \
         .next_time == datetime.datetime(year=2022, month=10, day=31)
-    assert Card("e", "f", _time, repetitions=10.0, interval=12.48, easiness=3.0) \
+    assert Card(top="e", bottom="f", last_repeat_time=_time, repetitions=10.0, interval=12.48,
+                easiness=3.0) \
         .next_time == datetime.datetime(year=2022, month=10, day=31)
